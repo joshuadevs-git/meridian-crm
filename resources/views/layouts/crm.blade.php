@@ -35,6 +35,11 @@
                 Branches
             </a>
 
+        <a href="{{ route('employees.index') }}"
+        class="block rounded-lg px-4 py-2 hover:bg-slate-700">
+        Employees
+          </a>
+
         </nav>
 
     </aside>
