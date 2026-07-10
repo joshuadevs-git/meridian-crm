@@ -1,23 +1,43 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Dashboard
-        </h2>
-    </x-slot>
+@extends('layouts.crm')
 
-    <div class="py-8">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+@section('title', 'Dashboard')
 
-            <div class="bg-white shadow rounded-lg p-6">
-                <h1 class="text-3xl font-bold">
-                    Meridian CRM
-                </h1>
+@section('content')
 
-                <p class="mt-2 text-gray-600">
-                    Welcome to your CRM Dashboard.
-                </p>
-            </div>
+<div class="grid grid-cols-4 gap-6">
 
-        </div>
+    <div class="bg-white rounded-xl shadow p-6">
+        <h2 class="text-gray-500">Branches</h2>
+
+        <p class="text-4xl font-bold mt-3">
+            0
+        </p>
     </div>
-</x-app-layout>
+
+    <div class="bg-white rounded-xl shadow p-6">
+        <h2 class="text-gray-500">Customers</h2>
+
+        <p class="text-4xl font-bold mt-3">
+            0
+        </p>
+    </div>
+
+    <div class="bg-white rounded-xl shadow p-6">
+        <h2 class="text-gray-500">Leads</h2>
+
+        <p class="text-4xl font-bold mt-3">
+            0
+        </p>
+    </div>
+
+    <div class="bg-white rounded-xl shadow p-6">
+        <h2 class="text-gray-500">Deals</h2>
+
+        <p class="text-4xl font-bold mt-3">
+            0
+        </p>
+    </div>
+
+</div>
+
+@endsection
