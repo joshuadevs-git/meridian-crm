@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Attendance;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Employee extends Model
@@ -31,4 +33,10 @@ class Employee extends Model
     {
         return $this->belongsTo(Branch::class);
     }
+
+    
+    public function attendances(): HasMany
+{
+    return $this->hasMany(Attendance::class);
+}
 }

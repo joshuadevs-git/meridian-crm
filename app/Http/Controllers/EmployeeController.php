@@ -2,24 +2,105 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Employee;
 use App\Models\Branch;
+use App\Models\Employee;
+use Illuminate\Http\Request;
+use App\Exports\EmployeesExport;
+use App\Imports\EmployeesImport;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Requests\StoreEmployeeRequest;
 use App\Http\Requests\UpdateEmployeeRequest;
+
 
 class EmployeeController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+  public function index(Request $request)
 {
-    $employees = Employee::with('branch')
-        ->latest()
-        ->paginate(10);
+    $search = $request->search;
+    $branch = $request->branch;
+    $status = $request->status;
+    $sort = $request->sort ?? 'latest';
 
-    return view('employees.index', compact('employees'));
+    $employees = Employee::with('branch')
+
+        ->when($search, function ($query) use ($search) {
+
+            $query->where(function ($q) use ($search) {
+
+                $q->where('employee_no', 'like', "%{$search}%")
+                  ->orWhere('first_name', 'like', "%{$search}%")
+                  ->orWhere('last_name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+
+            });
+
+        })
+
+        ->when($branch, function ($query) use ($branch) {
+
+            $query->where('branch_id', $branch);
+
+        })
+
+        ->when($status !== null && $status !== '', function ($query) use ($status) {
+
+            $query->where('is_active', $status);
+
+        });
+
+    // Sorting
+    switch ($sort) {
+
+        case 'oldest':
+            $employees->oldest();
+            break;
+
+        case 'name_asc':
+            $employees->orderBy('first_name');
+            break;
+
+        case 'name_desc':
+            $employees->orderByDesc('first_name');
+            break;
+
+        case 'salary_high':
+            $employees->orderByDesc('salary');
+            break;
+
+        case 'salary_low':
+            $employees->orderBy('salary');
+            break;
+
+        case 'hire_new':
+            $employees->orderByDesc('hire_date');
+            break;
+
+        case 'hire_old':
+            $employees->orderBy('hire_date');
+            break;
+
+        default:
+            $employees->latest();
+            break;
+    }
+
+    $employees = $employees
+        ->paginate(10)
+        ->withQueryString();
+
+    $branches = Branch::orderBy('name')->get();
+
+    return view('employees.index', compact(
+        'employees',
+        'branches',
+        'search',
+        'branch',
+        'status',
+        'sort'
+    ));
 }
 
     /**
@@ -94,5 +175,29 @@ class EmployeeController extends Controller
     return redirect()
         ->route('employees.index')
         ->with('success', 'Employee deleted successfully.');
+}
+
+public function export()
+{
+    return Excel::download(
+        new EmployeesExport,
+        'employees.xlsx'
+    );
+}
+
+public function import(Request $request)
+{
+    $request->validate([
+        'file' => 'required|mimes:xlsx,xls,csv',
+    ]);
+
+    Excel::import(
+        new EmployeesImport,
+        $request->file('file')
+    );
+
+    return redirect()
+        ->route('employees.index')
+        ->with('success', 'Employees imported successfully.');
 }
 }

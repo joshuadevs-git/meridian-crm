@@ -6,6 +6,8 @@
     <title>Meridian CRM</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    
 </head>
 
 <body class="bg-gray-100">
@@ -39,6 +41,11 @@
         class="block rounded-lg px-4 py-2 hover:bg-slate-700">
         Employees
           </a>
+
+          <a href="{{ route('attendances.index') }}"
+    class="block rounded-lg px-4 py-2 hover:bg-slate-700">
+    Attendance
+</a>
 
         </nav>
 
@@ -80,6 +87,6 @@
     </div>
 
 </div>
-
+@stack('scripts')
 </body>
 </html>
