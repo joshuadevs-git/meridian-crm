@@ -6,11 +6,13 @@ use Illuminate\View\View;
 use App\Models\Employee;
 use App\Models\Branch;
 use App\Models\Attendance;
+use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
 {
     $totalEmployees = Employee::count();
 
@@ -93,6 +95,9 @@ class DashboardController extends Controller
     'statusCounts',
     'dailyLabels',
     'dailyCounts',
+    'presentToday',
+    'lateToday',
+    'absentToday',
 ));
 }
 }

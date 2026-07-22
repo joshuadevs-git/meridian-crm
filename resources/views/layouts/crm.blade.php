@@ -47,6 +47,16 @@
     Attendance
 </a>
 
+
+<div class="pt-4 text-xs uppercase text-gray-400">
+    Reports
+</div>
+
+<a href="{{ route('reports.attendance') }}"
+   class="block rounded-lg px-4 py-2 hover:bg-slate-700">
+    Attendance Report
+</a>    
+
         </nav>
 
     </aside>

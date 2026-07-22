@@ -319,4 +319,34 @@
 
 </div>
 
+
+
+</form>
+
+
 @endsection
+
+
+@push('scripts')
+
+<script>
+
+document.querySelectorAll('.report-filter').forEach(function(input){
+
+    input.addEventListener('input', function(){
+
+        document.getElementById('reportFilterForm').submit();
+
+    });
+
+    input.addEventListener('change', function(){
+
+        document.getElementById('reportFilterForm').submit();
+
+    });
+
+});
+
+</script>
+
+@endpush

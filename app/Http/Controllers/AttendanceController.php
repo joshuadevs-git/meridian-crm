@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Attendance;
+use App\Models\Branch;
 use App\Models\Employee;
+use App\Models\Attendance;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreAttendanceRequest;
 use App\Http\Requests\UpdateAttendanceRequest;
@@ -14,13 +15,71 @@ class AttendanceController extends Controller
      * Display a listing of the resource.
      */
 
-public function index()
+public function index(Request $request)
 {
-    $attendances = Attendance::with('employee.branch')
-        ->latest()
-        ->paginate(10);
+    $search = $request->search;
+    $branch = $request->branch;
+    $status = $request->status;
+    $dateFrom = $request->date_from;
+    $dateTo = $request->date_to;
 
-    return view('attendances.index', compact('attendances'));
+    $attendances = Attendance::with('employee.branch')
+
+        ->when($search, function ($query) use ($search) {
+
+            $query->whereHas('employee', function ($q) use ($search) {
+
+                $q->where('employee_no', 'like', "%{$search}%")
+                  ->orWhere('first_name', 'like', "%{$search}%")
+                  ->orWhere('last_name', 'like', "%{$search}%");
+
+            });
+
+        })
+
+        ->when($branch, function ($query) use ($branch) {
+
+            $query->whereHas('employee', function ($q) use ($branch) {
+
+                $q->where('branch_id', $branch);
+
+            });
+
+        })
+
+        ->when($status, function ($query) use ($status) {
+
+            $query->where('status', $status);
+
+        })
+
+        ->when($dateFrom, function ($query) use ($dateFrom) {
+
+            $query->whereDate('attendance_date', '>=', $dateFrom);
+
+        })
+
+        ->when($dateTo, function ($query) use ($dateTo) {
+
+            $query->whereDate('attendance_date', '<=', $dateTo);
+
+        })
+
+        ->latest()
+        ->paginate(10)
+        ->withQueryString();
+
+    $branches = Branch::orderBy('name')->get();
+
+    return view('attendances.index', compact(
+        'attendances',
+        'branches',
+        'search',
+        'branch',
+        'status',
+        'dateFrom',
+        'dateTo'
+    ));
 }
 
     /**

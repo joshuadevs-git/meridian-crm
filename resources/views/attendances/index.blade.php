@@ -12,6 +12,69 @@
             Attendance Management
         </h2>
 
+        <form id="filterForm" method="GET" class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+
+    <input
+        type="text"
+        name="search"
+        placeholder="Search employee..."
+        value="{{ request('search') }}"
+        class="border rounded-lg px-3 py-2">
+
+    <select
+        name="branch"
+        class="border rounded-lg px-3 py-2">
+
+        <option value="">All Branches</option>
+
+        @foreach($branches as $item)
+
+            <option
+                value="{{ $item->id }}"
+                @selected(request('branch') == $item->id)>
+
+                {{ $item->name }}
+
+            </option>
+
+        @endforeach
+
+    </select>
+
+    <select
+        name="status"
+        class="border rounded-lg px-3 py-2">
+
+        <option value="">All Status</option>
+
+        @foreach(['Present','Late','Absent','Leave'] as $item)
+
+            <option
+                value="{{ $item }}"
+                @selected(request('status') == $item)>
+
+                {{ $item }}
+
+            </option>
+
+        @endforeach
+
+    </select>
+
+    <input
+        type="date"
+        name="date_from"
+        value="{{ request('date_from') }}"
+        class="border rounded-lg px-3 py-2">
+
+    <input
+        type="date"
+        name="date_to"
+        value="{{ request('date_to') }}"
+        class="border rounded-lg px-3 py-2">
+
+</form>
+
         <a href="{{ route('attendances.create') }}"
             class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
 
@@ -120,3 +183,30 @@
 </div>
 
 @endsection
+
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const form = document.getElementById('filterForm');
+
+    form.querySelectorAll('input, select').forEach(field => {
+
+        field.addEventListener('input', () => {
+
+            form.submit();
+
+        });
+
+        field.addEventListener('change', () => {
+
+            form.submit();
+
+        });
+
+    });
+
+});
+</script>
+@endpush
