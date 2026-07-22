@@ -1,8 +1,8 @@
 @csrf
 
 @if ($errors->any())
-    <div class="mb-4 bg-red-100 border border-red-400 p-4">
-        <ul>
+    <div class="mb-2 rounded-lg bg-red-50 border border-red-200 p-4">
+        <ul class="list-disc ml-5 text-red-600 text-sm space-y-1">
             @foreach ($errors->all() as $error)
                 <li>{{ $error }}</li>
             @endforeach
@@ -10,120 +10,135 @@
     </div>
 @endif
 
-<select name="employee_id" class="w-full border rounded-lg px-3 py-2" required>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
 
-    <option value="">Select Employee</option>
-
-    @foreach($employees as $employee)
-
-        <option
-            value="{{ $employee->id }}"
-            {{ old('employee_id', $leave?->employee_id) == $employee->id ? 'selected' : '' }}>
-
-            {{ $employee->employee_no }}
-            -
-            {{ $employee->first_name }}
-            {{ $employee->last_name }}
-
-        </option>
-
-    @endforeach
-
-</select>
-
-    <div>
-        <label class="block mb-2 font-medium">Leave Type</label>
+    <!-- Employee -->
+    <div class="flex items-center gap-4 md:col-span-2">
+        <label class="w-32 shrink-0 text-sm font-medium text-gray-600">Employee</label>
 
         <select
-            name="leave_type"
-            class="w-full border rounded-lg px-3 py-2">
+            name="employee_id"
+            class="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200"
+            required>
 
-            @foreach([
-                'Vacation Leave',
-                'Sick Leave',
-                'Emergency Leave',
-                'Maternity Leave',
-                'Paternity Leave',
-                'Others'
-            ] as $type)
+            <option value="">Select Employee</option>
 
+            @foreach($employees as $employee)
                 <option
-                    value="{{ $type }}"
-                    @selected(old('leave_type', $leave->leave_type ?? '') == $type)>
-
-                    {{ $type }}
-
+                    value="{{ $employee->id }}"
+                    @selected(old('employee_id', $leave->employee_id ?? '') == $employee->id)>
+                    {{ $employee->employee_no }} - {{ $employee->first_name }} {{ $employee->last_name }}
                 </option>
-
             @endforeach
 
         </select>
     </div>
 
-    <div>
-        <label class="block mb-2 font-medium">Start Date</label>
+    <!-- Leave Type -->
+    <div class="flex items-center gap-4">
+        <label class="w-32 shrink-0 text-sm font-medium text-gray-600">Leave Type</label>
+
+        <select
+            name="leave_type"
+            class="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200">
+
+            <option value="Vacation Leave" @selected(old('leave_type', $leave->leave_type ?? '') == 'Vacation Leave')>
+                Vacation Leave
+            </option>
+
+            <option value="Sick Leave" @selected(old('leave_type', $leave->leave_type ?? '') == 'Sick Leave')>
+                Sick Leave
+            </option>
+
+            <option value="Emergency Leave" @selected(old('leave_type', $leave->leave_type ?? '') == 'Emergency Leave')>
+                Emergency Leave
+            </option>
+
+            <option value="Maternity Leave" @selected(old('leave_type', $leave->leave_type ?? '') == 'Maternity Leave')>
+                Maternity Leave
+            </option>
+
+            <option value="Paternity Leave" @selected(old('leave_type', $leave->leave_type ?? '') == 'Paternity Leave')>
+                Paternity Leave
+            </option>
+
+            <option value="Others" @selected(old('leave_type', $leave->leave_type ?? '') == 'Others')>
+                Others
+            </option>
+
+        </select>
+    </div>
+
+    <!-- Start Date -->
+    <div class="flex items-center gap-4">
+        <label class="w-32 shrink-0 text-sm font-medium text-gray-600">Start Date</label>
 
         <input
             type="date"
             name="start_date"
-            value="{{ old('start_date', isset($leave) ? $leave->start_date->format('Y-m-d') : '') }}"
-            class="w-full border rounded-lg px-3 py-2"
+            value="{{ old('start_date', isset($leave) ? $leave->start_date?->format('Y-m-d') : '') }}"
+            class="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200"
             required>
     </div>
 
-    <div>
-        <label class="block mb-2 font-medium">End Date</label>
+    <!-- End Date -->
+    <div class="flex items-center gap-4">
+        <label class="w-32 shrink-0 text-sm font-medium text-gray-600">End Date</label>
 
         <input
             type="date"
             name="end_date"
-            value="{{ old('end_date', isset($leave) ? $leave->end_date->format('Y-m-d') : '') }}"
-            class="w-full border rounded-lg px-3 py-2"
+            value="{{ old('end_date', isset($leave) ? $leave->end_date?->format('Y-m-d') : '') }}"
+            class="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200"
             required>
     </div>
 
-    <div>
-        <label class="block mb-2 font-medium">Status</label>
+    <!-- Status -->
+    <div class="flex items-center gap-4">
+        <label class="w-32 shrink-0 text-sm font-medium text-gray-600">Status</label>
 
         <select
             name="status"
-            class="w-full border rounded-lg px-3 py-2">
+            class="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200">
 
-            @foreach(['Pending', 'Approved', 'Rejected'] as $status)
+            <option value="Pending" @selected(old('status', $leave->status ?? '') == 'Pending')>
+                Pending
+            </option>
 
-                <option
-                    value="{{ $status }}"
-                    @selected(old('status', $leave->status ?? 'Pending') == $status)>
+            <option value="Approved" @selected(old('status', $leave->status ?? '') == 'Approved')>
+                Approved
+            </option>
 
-                    {{ $status }}
-
-                </option>
-
-            @endforeach
+            <option value="Rejected" @selected(old('status', $leave->status ?? '') == 'Rejected')>
+                Rejected
+            </option>
 
         </select>
     </div>
 
-    <div class="md:col-span-2">
-
-        <label class="block mb-2 font-medium">Reason</label>
+    <!-- Reason -->
+    <div class="md:col-span-2 flex items-start gap-4">
+        <label class="w-32 shrink-0 pt-2.5 text-sm font-medium text-gray-600">Reason</label>
 
         <textarea
             name="reason"
-            rows="3"
-            class="w-full border rounded-lg px-3 py-2">{{ old('reason', $leave->reason ?? '') }}</textarea>
-
+            rows="4"
+            class="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200">{{ old('reason', $leave->reason ?? '') }}</textarea>
     </div>
 
-    <div class="mt-6">
+</div>
+
+<div class="mt-6 pt-6 border-t border-gray-100 flex gap-3">
 
     <button
-        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">
-
-        Save Leave Request
-
+        type="submit"
+        class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-6 py-2.5 rounded-xl shadow-sm transition">
+        {{ isset($leave) ? 'Update Leave Request' : 'Save Leave Request' }}
     </button>
 
-</div>
+    <a href="{{ route('leaves.index') }}"
+       class="bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 text-sm font-medium px-6 py-2.5 rounded-xl transition">
+        Cancel
+    </a>
 
 </div>

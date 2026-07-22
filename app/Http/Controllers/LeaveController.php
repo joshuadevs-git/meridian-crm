@@ -10,33 +10,33 @@ use Illuminate\Http\Request;
 class LeaveController extends Controller
 {
     public function index()
-{
-    $leaves = Leave::with('employee')
-        ->latest()
-        ->paginate(10);
+    {
+        $leaves = Leave::with('employee')
+            ->latest()
+            ->paginate(10);
 
-    $totalLeaves = Leave::count();
+        $totalLeaves = Leave::count();
+        $pendingLeaves = Leave::where('status', 'Pending')->count();
+        $approvedLeaves = Leave::where('status', 'Approved')->count();
+        $rejectedLeaves = Leave::where('status', 'Rejected')->count();
 
-    $pendingLeaves = Leave::where('status', 'Pending')->count();
-
-    $approvedLeaves = Leave::where('status', 'Approved')->count();
-
-    $rejectedLeaves = Leave::where('status', 'Rejected')->count();
-
-    return view('leaves.index', compact(
-        'leaves',
-        'totalLeaves',
-        'pendingLeaves',
-        'approvedLeaves',
-        'rejectedLeaves'
-    ));
-}
+        return view('leaves.index', compact(
+            'leaves',
+            'totalLeaves',
+            'pendingLeaves',
+            'approvedLeaves',
+            'rejectedLeaves'
+        ));
+    }
 
     public function create()
     {
         $employees = Employee::orderBy('first_name')->get();
 
-        return view('leaves.create', compact('employees'));
+        return view('leaves.create', [
+            'employees' => $employees,
+            'leave' => new Leave(),
+        ]);
     }
 
     public function store(StoreLeaveRequest $request)
@@ -48,40 +48,37 @@ class LeaveController extends Controller
             ->with('success', 'Leave request created successfully.');
     }
 
-    public function edit(Leave $leaf)
-    {
-        $employees = Employee::orderBy('first_name')->get();
+    public function edit($leaf)
+{
+    $leave = Leave::findOrFail($leaf);
 
-        return view('leaves.edit', [
-            'leave' => $leaf,
-            'employees' => $employees,
-        ]);
-    }
+    $employees = Employee::orderBy('first_name')->get();
 
-    public function update(Request $request, Leave $leaf)
-    {
-        $request->validate([
-            'employee_id' => 'required',
-            'leave_type' => 'required',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date',
-            'status' => 'required',
-            'reason' => 'nullable',
-        ]);
+    return view('leaves.edit', compact(
+        'leave',
+        'employees'
+    ));
+}
 
-        $leaf->update($request->all());
+    public function update(StoreLeaveRequest $request, $leaf)
+{
+    $leave = Leave::findOrFail($leaf);
 
-        return redirect()
-            ->route('leaves.index')
-            ->with('success', 'Leave updated successfully.');
-    }
+    $leave->update($request->validated());
 
-    public function destroy(Leave $leaf)
-    {
-        $leaf->delete();
+    return redirect()
+        ->route('leaves.index')
+        ->with('success', 'Leave updated successfully.');
+}
 
-        return redirect()
-            ->route('leaves.index')
-            ->with('success', 'Leave deleted successfully.');
-    }
+public function destroy($leaf)
+{
+    $leave = Leave::findOrFail($leaf);
+
+    $leave->delete();
+
+    return redirect()
+        ->route('leaves.index')
+        ->with('success', 'Leave deleted successfully.');
+}
 }

@@ -5,6 +5,7 @@ use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AttendanceController;
@@ -30,15 +31,11 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::get(
-        '/employees/export',
-        [EmployeeController::class, 'export']
-    )->name('employees.export');
+    Route::get('/employees/export', [EmployeeController::class, 'export'])
+        ->name('employees.export');
 
-    Route::post(
-        '/employees/import',
-        [EmployeeController::class, 'import']
-    )->name('employees.import');
+    Route::post('/employees/import', [EmployeeController::class, 'import'])
+        ->name('employees.import');
 
     Route::resource('employees', EmployeeController::class);
 
@@ -60,54 +57,70 @@ Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Reports
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get(
-    '/reports/leaves',
-    [ReportController::class, 'leaveReport']
-    )->name('reports.leaves');
-
-    Route::get(
-    '/reports/leaves/excel',
-    [ReportController::class, 'leaveExcel']
-    )->name('reports.leaves.excel');
-
-    Route::get(
-    '/reports/leaves/csv',
-    [ReportController::class, 'leaveCsv']
-    )->name('reports.leaves.csv');
-
-    Route::get(
-    '/reports/leaves/pdf',
-    [ReportController::class, 'leavePdf']
-    )->name('reports.leaves.pdf');
-    
-     /*
-    |--------------------------------------------------------------------------
-    | Leave
+    | Leave Management
     |--------------------------------------------------------------------------
     */
 
     Route::resource('leaves', LeaveController::class);
 
+    /*
+    |--------------------------------------------------------------------------
+    | Payroll Management
+    |--------------------------------------------------------------------------
+    */
+
+    Route::resource('payrolls', PayrollController::class);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Reports
+    |--------------------------------------------------------------------------
+    */
 
     Route::prefix('reports')->group(function () {
 
-    Route::get('/attendance', [ReportController::class, 'attendance'])
-        ->name('reports.attendance');
+        // Attendance Reports
 
-    Route::get('/attendance/excel', [ReportController::class, 'exportExcel'])
-        ->name('reports.attendance.excel');
+        Route::get('/attendance', [ReportController::class, 'attendance'])
+            ->name('reports.attendance');
 
-    Route::get('/attendance/csv', [ReportController::class, 'exportCsv'])
-        ->name('reports.attendance.csv');
+        Route::get('/attendance/excel', [ReportController::class, 'exportExcel'])
+            ->name('reports.attendance.excel');
 
-    Route::get('/attendance/pdf', [ReportController::class, 'exportPdf'])
-        ->name('reports.attendance.pdf');
+        Route::get('/attendance/csv', [ReportController::class, 'exportCsv'])
+            ->name('reports.attendance.csv');
 
-});
+        Route::get('/attendance/pdf', [ReportController::class, 'exportPdf'])
+            ->name('reports.attendance.pdf');
+
+        // Leave Reports
+
+        Route::get('/leaves', [ReportController::class, 'leaveReport'])
+            ->name('reports.leaves');
+
+        Route::get('/leaves/excel', [ReportController::class, 'leaveExcel'])
+            ->name('reports.leaves.excel');
+
+        Route::get('/leaves/csv', [ReportController::class, 'leaveCsv'])
+            ->name('reports.leaves.csv');
+
+        Route::get('/leaves/pdf', [ReportController::class, 'leavePdf'])
+            ->name('reports.leaves.pdf');
+
+        // Payroll Reports
+
+        Route::get('/payroll', [PayrollController::class, 'report'])
+            ->name('reports.payroll');
+
+        Route::get('/payroll/excel', [PayrollController::class, 'exportExcel'])
+            ->name('reports.payroll.excel');
+
+        Route::get('/payroll/csv', [PayrollController::class, 'exportCsv'])
+            ->name('reports.payroll.csv');
+
+        Route::get('/payroll/pdf', [PayrollController::class, 'exportPdf'])
+            ->name('reports.payroll.pdf');
+    });
 
     /*
     |--------------------------------------------------------------------------

@@ -1,20 +1,24 @@
-<x-app-layout>
+@extends('layouts.crm')
 
-    <div class="p-6">
+@section('title', 'Edit Leave Request')
 
-        <h2 class="text-2xl font-bold mb-6">
-            Edit Leave Request
-        </h2>
+@section('content')
 
-        <form action="{{ route('leaves.update', $leave->id) }}" method="POST">
+<div class="max-w-4xl">
 
-            @csrf
-            @method('PUT')
+    <h2 class="text-xl font-bold mb-6">
+        Edit Leave Request
+    </h2>
 
-            @include('leaves._form')
+    <form action="{{ route('leaves.update', $leave->id) }}" method="POST">
 
-        </form>
+        @csrf
+        @method('PUT')
 
-    </div>
+        @include('leaves._form', ['leave' => $leave])
 
-</x-app-layout>
+    </form>
+
+</div>
+
+@endsection

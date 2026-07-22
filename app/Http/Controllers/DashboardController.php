@@ -9,6 +9,7 @@ use App\Models\Attendance;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Models\Payroll;
 
 class DashboardController extends Controller
 {
@@ -78,6 +79,14 @@ class DashboardController extends Controller
     )->count();
 }
 
+$totalPayrolls = Payroll::count();
+
+$totalPayrollAmount = Payroll::sum('net_salary');
+
+$highestPayroll = Payroll::max('net_salary') ?? 0;
+
+$lowestPayroll = Payroll::min('net_salary') ?? 0;
+
     return view('dashboard.index', compact(
     'totalEmployees',
     'activeEmployees',
@@ -98,6 +107,10 @@ class DashboardController extends Controller
     'presentToday',
     'lateToday',
     'absentToday',
+     'totalPayrolls',
+    'totalPayrollAmount',
+    'highestPayroll',
+    'lowestPayroll'
 ));
 }
 }
