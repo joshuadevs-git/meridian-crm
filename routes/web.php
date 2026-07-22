@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ProfileController;
@@ -62,6 +63,35 @@ Route::middleware(['auth'])->group(function () {
     | Reports
     |--------------------------------------------------------------------------
     */
+
+    Route::get(
+    '/reports/leaves',
+    [ReportController::class, 'leaveReport']
+    )->name('reports.leaves');
+
+    Route::get(
+    '/reports/leaves/excel',
+    [ReportController::class, 'leaveExcel']
+    )->name('reports.leaves.excel');
+
+    Route::get(
+    '/reports/leaves/csv',
+    [ReportController::class, 'leaveCsv']
+    )->name('reports.leaves.csv');
+
+    Route::get(
+    '/reports/leaves/pdf',
+    [ReportController::class, 'leavePdf']
+    )->name('reports.leaves.pdf');
+    
+     /*
+    |--------------------------------------------------------------------------
+    | Leave
+    |--------------------------------------------------------------------------
+    */
+
+    Route::resource('leaves', LeaveController::class);
+
 
     Route::prefix('reports')->group(function () {
 

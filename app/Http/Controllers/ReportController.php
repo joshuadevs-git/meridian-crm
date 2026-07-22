@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Attendance;
 use App\Models\Branch;
+use App\Models\Attendance;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use App\Exports\AttendanceReportExport;
-use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Exports\LeaveReportExport;
+use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\AttendanceReportExport;
 
 class ReportController extends Controller
 {
@@ -129,6 +130,90 @@ public function exportPdf(Request $request)
     return $pdf->download('attendance-report.pdf');
 }
 
+
+public function leaveReport(Request $request)
+{
+    $month = $request->month;
+    $status = $request->status;
+    $search = $request->search;
+
+    $leaveReport = \App\Models\Leave::with('employee')
+
+        ->when($month, function ($q) use ($month) {
+            $q->whereYear('start_date', substr($month, 0, 4))
+              ->whereMonth('start_date', substr($month, 5, 2));
+        })
+
+        ->when($status, function ($q) use ($status) {
+            $q->where('status', $status);
+        })
+
+        ->when($search, function ($q) use ($search) {
+            $q->whereHas('employee', function ($x) use ($search) {
+                $x->where('employee_no', 'like', "%{$search}%")
+                  ->orWhere('first_name', 'like', "%{$search}%")
+                  ->orWhere('last_name', 'like', "%{$search}%");
+            });
+        })
+
+        ->latest()
+        ->paginate(10)
+        ->withQueryString();
+
+    return view('reports.leaves', compact(
+        'leaveReport',
+        'month',
+        'status',
+        'search'
+    ));
 }
+
+
+
+public function leaveExcel(Request $request)
+{
+    return Excel::download(
+        new LeaveReportExport(
+            $request->month,
+            $request->status,
+            $request->search
+        ),
+        'leave-report.xlsx'
+    );
+}
+
+public function leaveCsv(Request $request)
+{
+    return Excel::download(
+        new LeaveReportExport(
+            $request->month,
+            $request->status,
+            $request->search
+        ),
+        'leave-report.csv'
+    );
+}
+
+public function leavePdf(Request $request)
+{
+    $leaveReport = (new LeaveReportExport(
+        $request->month,
+        $request->status,
+        $request->search
+    ))->collection();
+
+    $pdf = Pdf::loadView(
+        'reports.leave-pdf',
+        compact('leaveReport')
+    );
+
+    return $pdf->download('leave-report.pdf');
+}
+
+}
+
+
+
+
 
 
