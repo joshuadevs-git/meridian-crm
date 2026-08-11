@@ -16,6 +16,31 @@
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
+        <!-- Role -->
+<div class="mt-4">
+    <x-input-label for="role_id" :value="__('Role')" />
+
+    <select
+        id="role_id"
+        name="role_id"
+        class="block mt-1 w-full border-gray-300 rounded-md shadow-sm"
+        required
+    >
+        <option value="">Select Role</option>
+
+        @foreach($roles as $role)
+            <option
+                value="{{ $role->id }}"
+                {{ old('role_id') == $role->id ? 'selected' : '' }}
+            >
+                {{ $role->name }}
+            </option>
+        @endforeach
+    </select>
+
+    <x-input-error :messages="$errors->get('role_id')" class="mt-2" />
+</div>
+
         <!-- Password -->
         <div class="mt-4">
             <x-input-label for="password" :value="__('Password')" />

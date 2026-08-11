@@ -13,104 +13,138 @@ use App\Models\Payroll;
 
 class DashboardController extends Controller
 {
-    public function index(Request $request)
+public function index(Request $request)
 {
-    $totalEmployees = Employee::count();
+    $user = auth()->user();
 
-    $activeEmployees = Employee::where('is_active', true)->count();
+    if (!$user->role) {
+        abort(403, 'No role assigned.');
+    }
 
-    $inactiveEmployees = Employee::where('is_active', false)->count();
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Dashboard
+    |--------------------------------------------------------------------------
+    */
 
-    $totalBranches = Branch::count();
+    if ($user->isAdmin()) {
 
-    $recentEmployees = Employee::with('branch')
-    ->latest()
-    ->take(5)
-    ->get();
+        $totalEmployees = Employee::count();
 
-    $branches = Branch::withCount('employees')
-    ->orderBy('name')
-    ->get();
+        $activeEmployees = Employee::where('is_active', true)->count();
 
-    $branchLabels = $branches->pluck('name');
+        $inactiveEmployees = Employee::where('is_active', false)->count();
 
-    $branchEmployeeCounts = $branches->pluck('employees_count');
+        $totalBranches = Branch::count();
 
-    $totalAttendance = Attendance::count();
+        $recentEmployees = Employee::with('branch')
+            ->latest()
+            ->take(5)
+            ->get();
 
-    $presentToday = Attendance::whereDate('attendance_date', Carbon::today())
-    ->where('status', 'Present')
-    ->count();
+        $branches = Branch::withCount('employees')
+            ->orderBy('name')
+            ->get();
 
-    $lateToday = Attendance::whereDate('attendance_date', Carbon::today())
-    ->where('status', 'Late')
-    ->count();
+        $branchLabels = $branches->pluck('name');
 
-    $absentToday = Attendance::whereDate('attendance_date', Carbon::today())
-    ->where('status', 'Absent')
-    ->count();  
+        $branchEmployeeCounts = $branches->pluck('employees_count');
 
-    $statusLabels = [
-    'Present',
-    'Late',
-    'Absent',
-    'Leave',
-];
+        $totalAttendance = Attendance::count();
 
-    $statusCounts = [
-    Attendance::where('status', 'Present')->count(),
-    Attendance::where('status', 'Late')->count(),
-    Attendance::where('status', 'Absent')->count(),
-    Attendance::where('status', 'Leave')->count(),
-];
+        $presentToday = Attendance::whereDate('attendance_date', Carbon::today())
+            ->where('status', 'Present')
+            ->count();
 
-    $dailyLabels = [];
-    $dailyCounts = [];
+        $lateToday = Attendance::whereDate('attendance_date', Carbon::today())
+            ->where('status', 'Late')
+            ->count();
 
-    for ($i = 6; $i >= 0; $i--) {
+        $absentToday = Attendance::whereDate('attendance_date', Carbon::today())
+            ->where('status', 'Absent')
+            ->count();
 
-    $date = Carbon::today()->subDays($i);
+        $statusLabels = [
+            'Present',
+            'Late',
+            'Absent',
+            'Leave',
+        ];
 
-    $dailyLabels[] = $date->format('M d');
+        $statusCounts = [
+            Attendance::where('status', 'Present')->count(),
+            Attendance::where('status', 'Late')->count(),
+            Attendance::where('status', 'Absent')->count(),
+            Attendance::where('status', 'Leave')->count(),
+        ];
 
-    $dailyCounts[] = Attendance::whereDate(
-        'attendance_date',
-        $date
-    )->count();
-}
+        $dailyLabels = [];
+        $dailyCounts = [];
 
-$totalPayrolls = Payroll::count();
+        for ($i = 6; $i >= 0; $i--) {
 
-$totalPayrollAmount = Payroll::sum('net_salary');
+            $date = Carbon::today()->subDays($i);
 
-$highestPayroll = Payroll::max('net_salary') ?? 0;
+            $dailyLabels[] = $date->format('M d');
 
-$lowestPayroll = Payroll::min('net_salary') ?? 0;
+            $dailyCounts[] = Attendance::whereDate(
+                'attendance_date',
+                $date
+            )->count();
+        }
 
-    return view('dashboard.index', compact(
-    'totalEmployees',
-    'activeEmployees',
-    'inactiveEmployees',
-    'totalBranches',
-    'recentEmployees',
-    'branches',
-    'branchLabels',
-    'branchEmployeeCounts',
-    'totalAttendance',
-    'presentToday',
-    'lateToday',
-    'absentToday',
-    'statusLabels',
-    'statusCounts',
-    'dailyLabels',
-    'dailyCounts',
-    'presentToday',
-    'lateToday',
-    'absentToday',
-     'totalPayrolls',
-    'totalPayrollAmount',
-    'highestPayroll',
-    'lowestPayroll'
-));
+        $totalPayrolls = Payroll::count();
+
+        $totalPayrollAmount = Payroll::sum('net_salary');
+
+        $highestPayroll = Payroll::max('net_salary') ?? 0;
+
+        $lowestPayroll = Payroll::min('net_salary') ?? 0;
+
+        return view('dashboard.index', compact(
+            'totalEmployees',
+            'activeEmployees',
+            'inactiveEmployees',
+            'totalBranches',
+            'recentEmployees',
+            'branches',
+            'branchLabels',
+            'branchEmployeeCounts',
+            'totalAttendance',
+            'presentToday',
+            'lateToday',
+            'absentToday',
+            'statusLabels',
+            'statusCounts',
+            'dailyLabels',
+            'dailyCounts',
+            'totalPayrolls',
+            'totalPayrollAmount',
+            'highestPayroll',
+            'lowestPayroll'
+        ));
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | HR Dashboard
+    |--------------------------------------------------------------------------
+    */
+
+    if ($user->isHR()) {
+        return view('dashboard.hr');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Employee Dashboard
+    |--------------------------------------------------------------------------
+    */
+
+    if ($user->isEmployee()) {
+        return view('dashboard.employee');
+    }
+
+    abort(403, 'No role assigned.');
 }
 }

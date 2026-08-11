@@ -1,0 +1,101 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\User;
+use App\Models\Role;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
+
+class UserController extends Controller
+{
+    public function index()
+    {
+        $users = User::with('role')
+            ->latest()
+            ->paginate(10);
+
+        return view('users.index', compact('users'));
+    }
+
+    public function create()
+    {
+        $roles = Role::orderBy('name')->get();
+
+        return view('users.create', compact('roles'));
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'role_id' => ['required', 'exists:roles,id'],
+            'password' => ['required', 'confirmed', 'min:8'],
+        ]);
+
+        User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'role_id' => $validated['role_id'],
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        return redirect()
+            ->route('users.index')
+            ->with('success', 'User created successfully.');
+    }
+
+    public function edit(User $user)
+    {
+        $roles = Role::orderBy('name')->get();
+
+        return view('users.edit', compact('user', 'roles'));
+    }
+
+    public function update(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email')->ignore($user->id),
+            ],
+            'role_id' => ['required', 'exists:roles,id'],
+            'password' => ['nullable', 'confirmed', 'min:8'],
+        ]);
+
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        $user->role_id = $validated['role_id'];
+
+        if (!empty($validated['password'])) {
+            $user->password = Hash::make($validated['password']);
+        }
+
+        $user->save();
+
+        return redirect()
+            ->route('users.index')
+            ->with('success', 'User updated successfully.');
+    }
+
+    public function destroy(User $user)
+    {
+        // Prevent deleting the currently logged-in account
+        if ($user->id === auth()->id()) {
+            return redirect()
+                ->route('users.index')
+                ->with('error', 'You cannot delete your own account.');
+        }
+
+        $user->delete();
+
+        return redirect()
+            ->route('users.index')
+            ->with('success', 'User deleted successfully.');
+    }
+}
