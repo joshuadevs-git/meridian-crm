@@ -100,4 +100,45 @@ public function myLeaves()
 
     return view('employee.leaves', compact('employee', 'leaves'));
 }
+
+public function createMyLeave()
+{
+    $employee = auth()->user()->employee;
+
+    if (!$employee) {
+        abort(403, 'No employee profile is linked to this account.');
+    }
+
+    return view('employee.leave-create', compact('employee'));
+}
+
+public function storeMyLeave(Request $request)
+{
+    $employee = auth()->user()->employee;
+
+    if (!$employee) {
+        abort(403, 'No employee profile is linked to this account.');
+    }
+
+    $validated = $request->validate([
+        'start_date' => ['required', 'date'],
+        'end_date' => ['required', 'date', 'after_or_equal:start_date'],
+        'leave_type' => ['required', 'string', 'max:255'],
+        'reason' => ['nullable', 'string', 'max:1000'],
+    ]);
+
+    $employee->leaves()->create([
+        'start_date' => $validated['start_date'],
+        'end_date' => $validated['end_date'],
+        'leave_type' => $validated['leave_type'],
+        'reason' => $validated['reason'] ?? null,
+        'status' => 'Pending',
+    ]);
+
+    return redirect()
+        ->route('my-leaves')
+        ->with('success', 'Leave request submitted successfully.');
+}
+
+
 }

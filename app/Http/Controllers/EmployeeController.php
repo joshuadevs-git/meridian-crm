@@ -2,12 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Models\Role;
 use App\Models\Branch;
 use App\Models\Employee;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Exports\EmployeesExport;
 use App\Imports\EmployeesImport;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\StoreEmployeeRequest;
 use App\Http\Requests\UpdateEmployeeRequest;
 
@@ -120,11 +125,53 @@ class EmployeeController extends Controller
      */
     public function store(StoreEmployeeRequest $request)
 {
-    Employee::create($request->validated());
+    $data = $request->validated();
+
+    // Prevent duplicate user account
+    if (User::where('email', $data['email'])->exists()) {
+        return back()
+            ->withInput()
+            ->withErrors([
+                'email' => 'A user account with this email already exists.'
+            ]);
+    }
+
+    // Generate temporary password
+    $temporaryPassword = Str::random(10);
+
+    // Find Employee role
+    $employeeRole = Role::where('name', 'Employee')->first();
+
+    if (!$employeeRole) {
+        return back()
+            ->withInput()
+            ->withErrors([
+                'email' => 'Employee role does not exist. Please create the Employee role first.'
+            ]);
+    }
+
+    // Create login account
+    $user = User::create([
+        'name' => $data['first_name'] . ' ' . $data['last_name'],
+        'email' => $data['email'],
+        'password' => Hash::make($temporaryPassword),
+        'role_id' => $employeeRole->id,
+        'must_change_password' => true,
+    ]);
+
+    // Automatically connect employee to account
+    $data['user_id'] = $user->id;
+
+    $employee = Employee::create($data);
+
+    // Store temporary password in session so Admin/HR can see it once
+    session()->flash('temporary_password', $temporaryPassword);
+    session()->flash('created_employee_name', $employee->first_name . ' ' . $employee->last_name);
+    session()->flash('created_employee_email', $employee->email);
 
     return redirect()
         ->route('employees.index')
-        ->with('success', 'Employee created successfully.');
+        ->with('success', 'Employee and login account created successfully.');
 }
 
     /**

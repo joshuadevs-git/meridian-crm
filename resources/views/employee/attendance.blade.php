@@ -4,18 +4,94 @@
 
 @section('content')
 
+    {{-- Header --}}
+
 <div class="space-y-6">
 
-    {{-- Header --}}
-    <div>
-        <h1 class="text-2xl font-semibold text-gray-800">
-            My Attendance
-        </h1>
+{{-- Today's Attendance --}}
+<div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
 
-        <p class="text-sm text-gray-500 mt-1">
-            View your attendance records.
-        </p>
+    <div class="flex items-center justify-between">
+
+        <div>
+            <p class="text-xs uppercase tracking-wide text-gray-400">
+                Today's Attendance
+            </p>
+
+            <h2 class="text-lg font-semibold text-gray-800 mt-1">
+                {{ now()->format('F d, Y') }}
+            </h2>
+        </div>
+
+        <div class="flex gap-3">
+
+            @if(!$todayAttendance)
+
+                <form action="{{ route('my-attendance.check-in') }}" method="POST">
+                    @csrf
+
+                    <button
+                        class="px-5 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-medium">
+                        Check In
+                    </button>
+                </form>
+
+            @elseif(!$todayAttendance->time_out)
+
+                <form action="{{ route('my-attendance.check-out') }}" method="POST">
+                    @csrf
+
+                    <button
+                        class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-medium">
+                        Check Out
+                    </button>
+                </form>
+
+            @else
+
+                <span class="px-4 py-2 rounded-xl bg-green-100 text-green-700 text-sm">
+                    Attendance Completed
+                </span>
+
+            @endif
+
+        </div>
+
     </div>
+
+    <div class="grid grid-cols-3 gap-4 mt-5">
+
+        <div>
+            <p class="text-xs text-gray-400">Time In</p>
+
+            <p class="font-semibold text-gray-800">
+                {{ $todayAttendance?->time_in
+                    ? \Carbon\Carbon::parse($todayAttendance->time_in)->format('h:i A')
+                    : '—' }}
+            </p>
+        </div>
+
+        <div>
+            <p class="text-xs text-gray-400">Time Out</p>
+
+            <p class="font-semibold text-gray-800">
+                {{ $todayAttendance?->time_out
+                    ? \Carbon\Carbon::parse($todayAttendance->time_out)->format('h:i A')
+                    : '—' }}
+            </p>
+        </div>
+
+        <div>
+            <p class="text-xs text-gray-400">Status</p>
+
+            <p class="font-semibold text-gray-800">
+                {{ $todayAttendance?->status ?? 'Not Checked In' }}
+            </p>
+        </div>
+
+    </div>
+
+</div>
 
     {{-- Employee Information --}}
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">

@@ -7,6 +7,8 @@
 <div class="space-y-6">
 
     {{-- Header --}}
+    <div class="flex items-center justify-between">
+
     <div>
         <h1 class="text-2xl font-semibold text-gray-800">
             My Leaves
@@ -16,6 +18,15 @@
             View your leave requests and their current status.
         </p>
     </div>
+
+    <a href="{{ route('employee.leaves.create') }}"
+       class="inline-flex items-center px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl shadow-sm transition">
+
+        + Request Leave
+
+    </a>
+
+</div>
 
     {{-- Employee Information --}}
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">

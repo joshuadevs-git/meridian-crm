@@ -59,6 +59,7 @@
                     <th class="text-left px-6 py-3">Type</th>
                     <th class="text-left px-6 py-3">Start Date</th>
                     <th class="text-left px-6 py-3">End Date</th>
+                    <th class="px-5 py-3 text-left font-medium">Reason</th>
                     <th class="text-left px-6 py-3">Status</th>
                     <th class="text-right px-6 py-3">Actions</th>
                 </tr>
@@ -83,6 +84,8 @@
                     <td class="px-6 py-4 text-gray-600">{{ $leave->start_date->format('M d, Y') }}</td>
 
                     <td class="px-6 py-4 text-gray-600">{{ $leave->end_date->format('M d, Y') }}</td>
+
+                    <td class="px-5 py-4 text-gray-600">{{ $leave->reason ?: '—' }} </td>
 
                     <td class="px-6 py-4">
                         @php

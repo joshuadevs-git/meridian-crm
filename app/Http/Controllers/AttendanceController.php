@@ -170,12 +170,95 @@ public function myAttendance()
         abort(403, 'No employee profile is linked to this account.');
     }
 
+    $today = now()->toDateString();
+
+    $todayAttendance = $employee->attendances()
+        ->whereDate('attendance_date', $today)
+        ->first();
+
     $attendances = $employee->attendances()
         ->latest('attendance_date')
         ->latest('id')
         ->paginate(10);
 
-    return view('employee.attendance', compact('employee', 'attendances'));
+    return view('employee.attendance', compact(
+        'employee',
+        'todayAttendance',
+        'attendances'
+    ));
+}
+
+
+public function checkIn()
+{
+    $employee = auth()->user()->employee;
+
+    if (!$employee) {
+        abort(403, 'No employee profile is linked to this account.');
+    }
+
+    $today = now()->toDateString();
+
+    // Prevent duplicate check-in
+    $attendance = $employee->attendances()
+        ->whereDate('attendance_date', $today)
+        ->first();
+
+    if ($attendance) {
+        return redirect()
+            ->route('my-attendance')
+            ->with('error', 'You have already checked in today.');
+    }
+
+    // Determine status based on 8:00 AM
+    $status = now()->format('H:i') > '08:00'
+        ? 'Late'
+        : 'Present';
+
+    $employee->attendances()->create([
+        'attendance_date' => $today,
+        'time_in' => now(),
+        'status' => $status,
+    ]);
+
+    return redirect()
+        ->route('my-attendance')
+        ->with('success', 'You have successfully checked in.');
+}
+
+public function checkOut()
+{
+    $employee = auth()->user()->employee;
+
+    if (!$employee) {
+        abort(403, 'No employee profile is linked to this account.');
+    }
+
+    $today = now()->toDateString();
+
+    $attendance = $employee->attendances()
+        ->whereDate('attendance_date', $today)
+        ->first();
+
+    if (!$attendance) {
+        return redirect()
+            ->route('my-attendance')
+            ->with('error', 'You have not checked in today.');
+    }
+
+    if ($attendance->time_out) {
+        return redirect()
+            ->route('my-attendance')
+            ->with('error', 'You have already checked out today.');
+    }
+
+    $attendance->update([
+        'time_out' => now(),
+    ]);
+
+    return redirect()
+        ->route('my-attendance')
+        ->with('success', 'You have successfully checked out.');
 }
 
 

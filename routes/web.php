@@ -11,6 +11,7 @@ use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\ForcePasswordChangeController;
 
 
 /*
@@ -26,11 +27,30 @@ Route::get('/', function () {
 
 /*
 |--------------------------------------------------------------------------
-| Authenticated Users
+| Force Password Change
 |--------------------------------------------------------------------------
 */
 
 Route::middleware(['auth'])->group(function () {
+
+    Route::get('/force-password-change', [ForcePasswordChangeController::class, 'edit'])
+        ->name('password.force');
+
+    Route::post('/force-password-change', [ForcePasswordChangeController::class, 'update'])
+        ->name('password.force.update');
+});
+
+
+
+/*
+|--------------------------------------------------------------------------
+| Authenticated Users
+|--------------------------------------------------------------------------
+*/
+
+    Route::middleware(['auth', 'force.password'])->group(function () {
+
+
 
     /*
     |--------------------------------------------------------------------------
@@ -72,17 +92,29 @@ Route::middleware(['auth'])->group(function () {
 
     });
 
-    Route::get('/my-profile', [EmployeeController::class, 'myProfile'])
+        Route::get('/my-profile', [EmployeeController::class, 'myProfile'])
         ->name('my-profile');
 
-     Route::get('/my-attendance', [AttendanceController::class, 'myAttendance'])
+        Route::get('/my-attendance', [AttendanceController::class, 'myAttendance'])
         ->name('my-attendance');
 
-    Route::get('/my-leaves', [LeaveController::class, 'myLeaves'])
+        Route::get('/my-payroll', [PayrollController::class, 'myPayroll'])
+        ->name('my-payroll');
+
+        Route::get('/my-leaves', [LeaveController::class, 'myLeaves'])
         ->name('my-leaves');
 
-    Route::get('/my-payroll', [PayrollController::class, 'myPayroll'])
-        ->name('my-payroll');
+        Route::get('/my-leaves/create', [LeaveController::class, 'createMyLeave'])
+        ->name('employee.leaves.create');
+
+        Route::post('/my-leaves', [LeaveController::class, 'storeMyLeave'])
+        ->name('employee.leaves.store');
+
+        Route::post('/my-attendance/check-in', [AttendanceController::class, 'checkIn'])
+        ->name('my-attendance.check-in');
+
+        Route::post('/my-attendance/check-out', [AttendanceController::class, 'checkOut'])
+        ->name('my-attendance.check-out');
 
 
     /*

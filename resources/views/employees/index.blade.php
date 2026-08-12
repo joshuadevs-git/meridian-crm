@@ -4,6 +4,65 @@
 
 @section('content')
 
+@if(session('temporary_password'))
+
+    <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-5">
+
+        <div class="flex items-start justify-between gap-4">
+
+            <div>
+                <h3 class="font-semibold text-amber-800">
+                    Employee Account Created
+                </h3>
+
+                <p class="text-sm text-amber-700 mt-1">
+                    Login credentials for
+                    <strong>{{ session('created_employee_name') }}</strong>
+                </p>
+
+                <p class="text-sm text-amber-700">
+                    Email: {{ session('created_employee_email') }}
+                </p>
+            </div>
+
+        </div>
+
+        <div class="mt-4">
+
+            <label class="block text-xs font-medium text-amber-700 mb-1">
+                Temporary Password
+            </label>
+
+            <div class="flex gap-2">
+
+                <input
+                    id="temporaryPassword"
+                    type="text"
+                    readonly
+                    value="{{ session('temporary_password') }}"
+                    class="flex-1 rounded-lg border border-amber-300 bg-white px-3 py-2 text-sm font-mono"
+                >
+
+                <button
+                    type="button"
+                    onclick="copyTemporaryPassword()"
+                    class="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium"
+                >
+                    📋 Copy
+                </button>
+
+            </div>
+
+            <p class="text-xs text-amber-600 mt-2">
+                Save this password now. It will not be displayed again.
+            </p>
+
+        </div>
+
+    </div>
+
+@endif
+
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
 
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 p-6 border-b border-gray-100">
@@ -263,3 +322,16 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 @endpush
+
+@push('scripts')
+<script>
+function copyTemporaryPassword() {
+    const password = document.getElementById('temporaryPassword').value;
+
+    navigator.clipboard.writeText(password).then(() => {
+        alert('Temporary password copied!');
+    });
+}
+</script>
+@endpush
+
