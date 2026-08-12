@@ -81,4 +81,23 @@ public function destroy($leaf)
         ->route('leaves.index')
         ->with('success', 'Leave deleted successfully.');
 }
+
+
+
+
+public function myLeaves()
+{
+    $employee = auth()->user()->employee;
+
+    if (!$employee) {
+        abort(403, 'No employee profile is linked to this account.');
+    }
+
+    $leaves = $employee->leaves()
+        ->latest('start_date')
+        ->latest('id')
+        ->paginate(10);
+
+    return view('employee.leaves', compact('employee', 'leaves'));
+}
 }

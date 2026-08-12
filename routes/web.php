@@ -72,6 +72,18 @@ Route::middleware(['auth'])->group(function () {
 
     });
 
+    Route::get('/my-profile', [EmployeeController::class, 'myProfile'])
+        ->name('my-profile');
+
+     Route::get('/my-attendance', [AttendanceController::class, 'myAttendance'])
+        ->name('my-attendance');
+
+    Route::get('/my-leaves', [LeaveController::class, 'myLeaves'])
+        ->name('my-leaves');
+
+    Route::get('/my-payroll', [PayrollController::class, 'myPayroll'])
+        ->name('my-payroll');
+
 
     /*
     |--------------------------------------------------------------------------

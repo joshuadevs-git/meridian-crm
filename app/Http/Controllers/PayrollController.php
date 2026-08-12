@@ -182,4 +182,21 @@ public function exportPdf()
     return $pdf->download('payroll-report.pdf');
 }
 
+
+public function myPayroll()
+{
+    $employee = auth()->user()->employee;
+
+    if (!$employee) {
+        abort(403, 'No employee profile is linked to this account.');
+    }
+
+    $payrolls = $employee->payrolls()
+        ->latest('payroll_date')
+        ->latest('id')
+        ->paginate(10);
+
+    return view('employee.payroll', compact('employee', 'payrolls'));
+}
+
 }

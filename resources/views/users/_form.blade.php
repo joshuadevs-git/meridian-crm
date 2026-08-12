@@ -48,6 +48,7 @@
 
         <select
             name="role_id"
+            id="role_id"
             required
             class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200"
         >
@@ -62,6 +63,46 @@
                 </option>
             @endforeach
         </select>
+    </div>
+
+    {{-- Employee --}}
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+            Employee
+        </label>
+
+        <select
+            name="employee_id"
+            id="employee_id"
+            class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200"
+        >
+            <option value="">Select Employee</option>
+
+            @foreach($employees as $employee)
+                <option
+                    value="{{ $employee->id }}"
+                    @selected(
+                        old(
+                            'employee_id',
+                            $user->employee->id ?? ''
+                        ) == $employee->id
+                    )
+                >
+                    {{ $employee->employee_no }} -
+                    {{ $employee->first_name }} {{ $employee->last_name }}
+                </option>
+            @endforeach
+        </select>
+
+        <p class="text-xs text-gray-400 mt-1">
+            Required only when the selected role is Employee.
+        </p>
+
+        @error('employee_id')
+            <p class="text-sm text-red-600 mt-1">
+                {{ $message }}
+            </p>
+        @enderror
     </div>
 
     {{-- Password --}}

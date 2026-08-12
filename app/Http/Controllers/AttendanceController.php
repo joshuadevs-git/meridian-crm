@@ -161,4 +161,26 @@ public function index(Request $request)
         ->route('attendances.index')
         ->with('success', 'Attendance deleted successfully.');
 }
+
+public function myAttendance()
+{
+    $employee = auth()->user()->employee;
+
+    if (!$employee) {
+        abort(403, 'No employee profile is linked to this account.');
+    }
+
+    $attendances = $employee->attendances()
+        ->latest('attendance_date')
+        ->latest('id')
+        ->paginate(10);
+
+    return view('employee.attendance', compact('employee', 'attendances'));
 }
+
+
+
+}
+
+
+

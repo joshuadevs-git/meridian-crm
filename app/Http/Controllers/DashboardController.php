@@ -142,9 +142,75 @@ public function index(Request $request)
     */
 
     if ($user->isEmployee()) {
-        return view('dashboard.employee');
+
+    $employee = $user->employee;
+
+    if (!$employee) {
+        abort(403, 'No employee profile is linked to this account.');
     }
+
+    // Attendance summary
+    $presentCount = $employee->attendances()
+        ->where('status', 'Present')
+        ->count();
+
+    $lateCount = $employee->attendances()
+        ->where('status', 'Late')
+        ->count();
+
+    $absentCount = $employee->attendances()
+        ->where('status', 'Absent')
+        ->count();
+
+    // Leave summary
+    $pendingLeaves = $employee->leaves()
+        ->where('status', 'Pending')
+        ->count();
+
+    $approvedLeaves = $employee->leaves()
+        ->where('status', 'Approved')
+        ->count();
+
+    $rejectedLeaves = $employee->leaves()
+        ->where('status', 'Rejected')
+        ->count();
+
+    // Latest payroll
+    $latestPayroll = $employee->payrolls()
+        ->latest('payroll_date')
+        ->first();
+
+    // Recent attendance
+    $recentAttendance = $employee->attendances()
+        ->latest('attendance_date')
+        ->latest('id')
+        ->take(5)
+        ->get();
+
+    // Recent leaves
+    $recentLeaves = $employee->leaves()
+        ->latest('start_date')
+        ->latest('id')
+        ->take(5)
+        ->get();
+
+    return view('dashboard.employee', compact(
+        'employee',
+        'presentCount',
+        'lateCount',
+        'absentCount',
+        'pendingLeaves',
+        'approvedLeaves',
+        'rejectedLeaves',
+        'latestPayroll',
+        'recentAttendance',
+        'recentLeaves'
+    ));
+}
 
     abort(403, 'No role assigned.');
 }
-}
+
+
+
+    }   

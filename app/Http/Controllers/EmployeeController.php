@@ -200,4 +200,20 @@ public function import(Request $request)
         ->route('employees.index')
         ->with('success', 'Employees imported successfully.');
 }
+
+
+
+public function myProfile()
+{
+    $employee = auth()->user()->employee;
+
+    if (!$employee) {
+        abort(403, 'No employee profile is linked to this account.');
+    }
+
+    $employee->load('branch');
+
+    return view('employee.profile', compact('employee'));
+}
+
 }
