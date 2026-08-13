@@ -57,4 +57,10 @@ class Employee extends Model
     {
         return $this->hasMany(Payroll::class);
     }
+
+    public function schedules(): HasMany
+{
+    return $this->hasMany(EmployeeSchedule::class);
+}
+
 }

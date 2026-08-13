@@ -11,6 +11,7 @@ use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\EmployeeScheduleController;
 use App\Http\Controllers\ForcePasswordChangeController;
 
 
@@ -116,6 +117,15 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/my-attendance/check-out', [AttendanceController::class, 'checkOut'])
         ->name('my-attendance.check-out');
 
+        Route::get('/my-schedule', [EmployeeScheduleController::class, 'mySchedule'])
+        ->name('my-schedule');
+
+        Route::post('/my-attendance/start-break', [ AttendanceController::class,'startBreak'])
+        ->name('my-attendance.start-break');
+
+        Route::post('/my-attendance/end-break', [AttendanceController::class,'endBreak'])
+        ->name('my-attendance.end-break');
+
 
     /*
     |--------------------------------------------------------------------------
@@ -155,7 +165,21 @@ Route::middleware(['auth'])->group(function () {
             ->name('employees.import');
 
         Route::resource('employees', EmployeeController::class);
+        
+        /*
+|--------------------------------------------------------------------------
+| Employee Schedules
+|--------------------------------------------------------------------------
+*/
 
+        Route::get('/schedules', [EmployeeScheduleController::class, 'index'])
+        ->name('schedules.index');
+
+        Route::post('/schedules', [EmployeeScheduleController::class, 'store'])
+        ->name('schedules.store');
+  
+        Route::delete('/schedules/{schedule}', [EmployeeScheduleController::class, 'destroy'])
+        ->name('schedules.destroy');
 
         /*
         |--------------------------------------------------------------------------

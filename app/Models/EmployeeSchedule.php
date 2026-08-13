@@ -5,27 +5,25 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Attendance extends Model
+class EmployeeSchedule extends Model
 {
     protected $fillable = [
         'employee_id',
-        'attendance_date',
-        'time_in',
-        'time_out',
+        'schedule_date',
+        'status',
+        'start_time',
+        'end_time',
         'break_start',
         'break_end',
-        'break_minutes',
-        'status',
-        'remarks',
+        'notes',
     ];
 
     protected $casts = [
-        'attendance_date' => 'date',
-        'time_in' => 'datetime:H:i',
-        'time_out' => 'datetime:H:i',
+        'schedule_date' => 'date',
+        'start_time' => 'datetime:H:i',
+        'end_time' => 'datetime:H:i',
         'break_start' => 'datetime:H:i',
         'break_end' => 'datetime:H:i',
-        'break_minutes' => 'integer',
     ];
 
     public function employee(): BelongsTo

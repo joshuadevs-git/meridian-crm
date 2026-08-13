@@ -100,13 +100,13 @@
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-8">
 
         {{-- Attendance Trend (modern gradient area chart) --}}
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 xl:col-span-1">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 xl:col-span-2">
 
             <div class="flex items-center gap-2 mb-1">
                 <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                 <h2 class="font-bold text-gray-800 text-sm uppercase tracking-wide">Attendance Trend</h2>
             </div>
-            <p class="text-2xl font-bold text-gray-800">{{ $presentToday }} <span class="text-sm font-normal text-gray-400">present today</span></p>
+            <p class="text-2 font-bold text-gray-800">{{ $presentToday }} <span class="text-sm font-normal text-gray-400">present today</span></p>
 
             <div class="grid grid-cols-3 gap-3 mt-4 mb-2">
                 <div class="bg-gray-50 rounded-xl p-3">
@@ -123,49 +123,16 @@
                 </div>
             </div>
 
-            <div class="mt-4">
+            {{-- Fixed-height, relative wrapper is required so Chart.js has a stable
+                 box to measure against (prevents the canvas from growing every resize tick). --}}
+            <div class="mt-4 relative h-56 ">
                 <canvas id="attendanceTrendChart"
                         data-labels='@json($dailyLabels)'
-                        data-values='@json($dailyCounts)'
-                        height="150"></canvas>
-                <p class="text-xs text-gray-400 text-center mt-2">Last 7 days attendance</p>
+                        data-values='@json($dailyCounts)'></canvas>
             </div>
+            <p class="text-xs text-gray-400 text-center mt-2">Last 7 days attendance</p>
         </div>
 
-        {{-- Recent Employees (Team Collaboration style list) --}}
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 xl:col-span-1">
-            <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    <h2 class="font-bold text-gray-800 text-sm uppercase tracking-wide">Recent Employees</h2>
-                </div>
-                <a href="#" class="text-xs font-medium text-emerald-600 hover:underline">View all</a>
-            </div>
-
-            <ul class="divide-y divide-gray-100">
-                @forelse($recentEmployees as $employee)
-                    <li class="flex items-center justify-between py-3">
-                        <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold uppercase">
-                                {{ substr($employee->first_name, 0, 1) }}{{ substr($employee->last_name, 0, 1) }}
-                            </div>
-                            <div>
-                                <p class="text-sm font-medium text-gray-800">{{ $employee->first_name }} {{ $employee->last_name }}</p>
-                                <p class="text-xs text-gray-400">{{ $employee->position }} &middot; {{ $employee->branch->name }}</p>
-                            </div>
-                        </div>
-
-                        @if($employee->is_active)
-                            <span class="text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-600">Active</span>
-                        @else
-                            <span class="text-xs px-2 py-1 rounded-full bg-red-50 text-red-500">Inactive</span>
-                        @endif
-                    </li>
-                @empty
-                    <li class="text-center text-gray-400 text-sm py-8">No employees found.</li>
-                @endforelse
-            </ul>
-        </div>
 
         {{-- Attendance Status Donut (segmented, side legend) --}}
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 xl:col-span-1 flex flex-col">
@@ -175,11 +142,10 @@
                 <h2 class="font-bold text-gray-800 text-sm uppercase tracking-wide">Attendance Status</h2>
             </div>
 
-            <div class="flex-1 flex items-center justify-center relative">
+            <div class="flex items-center justify-center relative h-64">
                 <canvas id="attendanceStatusChart"
                         data-labels='@json($statusLabels)'
-                        data-values='@json($statusCounts)'
-                        width="200" height="200"></canvas>
+                        data-values='@json($statusCounts)'></canvas>
 
                 <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                     <p class="text-2xl font-bold text-gray-800">{{ array_sum($statusCounts ?? []) }}</p>
@@ -189,7 +155,9 @@
 
             @php
                 $statusTotal = array_sum($statusCounts ?? []) ?: 1;
-                $statusPalette = ['#059669', '#34d399', '#fbbf24', '#f87171', '#818cf8', '#c084fc'];
+                // Tri-tone green scale (dark -> mint -> pale) matching the reference design,
+                // with warm neutrals only if there are more than 3 segments.
+                $statusPalette = ['#047857', '#34d399', '#a7f3d0', '#fbbf24', '#f87171', '#818cf8'];
             @endphp
 
             <div class="grid grid-cols-2 gap-2 mt-4">
@@ -250,16 +218,17 @@
             </div>
         </div>
 
-        {{-- Employees per Branch Chart (modern gradient bars) --}}
+        {{-- Employees per Branch Chart (layered track + gradient bar, like the reference) --}}
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
             <div class="flex items-center gap-2 mb-4">
                 <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                 <h2 class="font-bold text-gray-800 text-sm uppercase tracking-wide">Employees Per Branch</h2>
             </div>
-            <canvas id="branchChart"
-                    data-labels='@json($branchLabels)'
-                    data-values='@json($branchEmployeeCounts)'
-                    height="220"></canvas>
+            <div class="relative h-64">
+                <canvas id="branchChart"
+                        data-labels='@json($branchLabels)'
+                        data-values='@json($branchEmployeeCounts)'></canvas>
+            </div>
         </div>
 
     </div>
@@ -267,162 +236,3 @@
 </div>
 
 @endsection
-
-
-@push('scripts')
-<script>
-document.querySelectorAll('.report-filter').forEach(function (input) {
-    input.addEventListener('input', function () {
-        document.getElementById('reportFilterForm')?.submit();
-    });
-    input.addEventListener('change', function () {
-        document.getElementById('reportFilterForm')?.submit();
-    });
-});
-
-// Chart.js rendering — modern gradient styling
-document.addEventListener('DOMContentLoaded', function () {
-    const emerald = '#059669';
-    const emeraldLight = '#34d399';
-    const palette = ['#059669', '#34d399', '#fbbf24', '#f87171', '#818cf8', '#c084fc'];
-
-    Chart.defaults.font.family = "'Inter', 'ui-sans-serif', 'system-ui', sans-serif";
-    Chart.defaults.color = '#9ca3af';
-
-    function parseData(canvas) {
-        return {
-            labels: JSON.parse(canvas.dataset.labels || '[]'),
-            values: JSON.parse(canvas.dataset.values || '[]'),
-        };
-    }
-
-    // --- Branch bar chart: gradient, rounded, thin bars ---
-    const branchCanvas = document.getElementById('branchChart');
-    if (branchCanvas && window.Chart) {
-        const { labels, values } = parseData(branchCanvas);
-        const ctx = branchCanvas.getContext('2d');
-
-        const gradient = ctx.createLinearGradient(0, 0, 0, branchCanvas.height || 220);
-        gradient.addColorStop(0, emeraldLight);
-        gradient.addColorStop(1, emerald);
-
-        new Chart(branchCanvas, {
-            type: 'bar',
-            data: {
-                labels,
-                datasets: [{
-                    label: 'Employees',
-                    data: values,
-                    backgroundColor: gradient,
-                    borderRadius: 10,
-                    borderSkipped: false,
-                    maxBarThickness: 34,
-                }]
-            },
-            options: {
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: '#111827',
-                        padding: 10,
-                        cornerRadius: 8,
-                        displayColors: false,
-                    },
-                },
-                scales: {
-                    x: { grid: { display: false }, border: { display: false } },
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: '#f3f4f6' },
-                        border: { display: false },
-                        ticks: { stepSize: 1 },
-                    },
-                },
-            }
-        });
-    }
-
-    // --- Attendance status donut: segmented, rounded, no default legend ---
-    const statusCanvas = document.getElementById('attendanceStatusChart');
-    if (statusCanvas && window.Chart) {
-        const { labels, values } = parseData(statusCanvas);
-        new Chart(statusCanvas, {
-            type: 'doughnut',
-            data: {
-                labels,
-                datasets: [{
-                    data: values,
-                    backgroundColor: palette,
-                    borderWidth: 4,
-                    borderColor: '#ffffff',
-                    borderRadius: 6,
-                    hoverOffset: 6,
-                }]
-            },
-            options: {
-                cutout: '72%',
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: '#111827',
-                        padding: 10,
-                        cornerRadius: 8,
-                    },
-                },
-            }
-        });
-    }
-
-    // --- Attendance trend: smooth gradient area line ---
-    const trendCanvas = document.getElementById('attendanceTrendChart');
-    if (trendCanvas && window.Chart) {
-        const { labels, values } = parseData(trendCanvas);
-        const ctx = trendCanvas.getContext('2d');
-
-        const fill = ctx.createLinearGradient(0, 0, 0, trendCanvas.height || 150);
-        fill.addColorStop(0, 'rgba(5, 150, 105, 0.25)');
-        fill.addColorStop(1, 'rgba(5, 150, 105, 0)');
-
-        new Chart(trendCanvas, {
-            type: 'line',
-            data: {
-                labels,
-                datasets: [{
-                    label: 'Attendance',
-                    data: values,
-                    borderColor: emerald,
-                    backgroundColor: fill,
-                    fill: true,
-                    tension: 0.45,
-                    borderWidth: 2.5,
-                    pointRadius: 0,
-                    pointHoverRadius: 5,
-                    pointHoverBackgroundColor: emerald,
-                    pointHoverBorderColor: '#ffffff',
-                    pointHoverBorderWidth: 2,
-                }]
-            },
-            options: {
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: '#111827',
-                        padding: 10,
-                        cornerRadius: 8,
-                        displayColors: false,
-                    },
-                },
-                scales: {
-                    x: { grid: { display: false }, border: { display: false } },
-                    y: {
-                        display: false,
-                        grid: { display: false },
-                    },
-                },
-                interaction: { intersect: false, mode: 'index' },
-            }
-        });
-    }
-});
-</script>
-@endpush

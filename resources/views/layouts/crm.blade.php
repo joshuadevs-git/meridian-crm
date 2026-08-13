@@ -68,6 +68,18 @@
                     Attendance
                 </a>
 
+                <a href="{{ route('schedules.index') }}" class="{{ $navClass('schedules.*') }}">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+    </svg>
+
+    Employee Schedule
+</a>
+
                 <a href="{{ route('leaves.index') }}" class="{{ $navClass('leaves.*') }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
@@ -90,6 +102,7 @@
                     </svg>
                     Attendance Report
                 </a>
+
 
                 <a href="{{ route('reports.leaves') }}" class="{{ $navClass('reports.leaves') }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,6 +150,17 @@
         </svg>
         My Attendance
     </a>
+
+    <a href="{{ route('my-schedule') }}" class="{{ $navClass('my-schedule') }}">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+            stroke="currentColor"
+            stroke-width="2"
+            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5v12a2 2 0 002 2z"/>
+    </svg>
+
+    My Schedule
+</a>
 
     <a href="{{ route('my-leaves') }}" class="{{ $navClass('my-leaves') }}">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
