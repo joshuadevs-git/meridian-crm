@@ -1,134 +1,109 @@
 @extends('layouts.crm')
 
-@section('title', 'My Attendance')
+@section('title', '')
 
 @section('content')
 
-    {{-- Header --}}
-
 <div class="space-y-6">
 
-{{-- Today's Attendance --}}
-<div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+    {{-- Today's Attendance --}}
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
 
-    <div class="flex items-center justify-between">
-
-        <div>
-            <p class="text-xs uppercase tracking-wide text-gray-400">
-                Today's Attendance
-            </p>
-
-            <h2 class="text-lg font-semibold text-gray-800 mt-1">
-                {{ now()->format('F d, Y') }}
-            </h2>
-        </div>
-
-        <div class="flex gap-3">
-
-            @if(!$todayAttendance)
-
-                <form action="{{ route('my-attendance.check-in') }}" method="POST">
-                    @csrf
-
-                    <button
-                        class="px-5 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-medium">
-                        Check In
-                    </button>
-                </form>
-
-            @elseif(!$todayAttendance->time_out)
-
-                <form action="{{ route('my-attendance.check-out') }}" method="POST">
-                    @csrf
-
-                    <button
-                        class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-medium">
-                        Check Out
-                    </button>
-                </form>
-
-            @else
-
-                <span class="px-4 py-2 rounded-xl bg-green-100 text-green-700 text-sm">
-                    Attendance Completed
-                </span>
-
-            @endif
-
-        </div>
-
-    </div>
-
-    <div class="grid grid-cols-3 gap-4 mt-5">
-
-        <div>
-            <p class="text-xs text-gray-400">Time In</p>
-
-            <p class="font-semibold text-gray-800">
-                {{ $todayAttendance?->time_in
-                    ? \Carbon\Carbon::parse($todayAttendance->time_in)->format('h:i A')
-                    : '—' }}
-            </p>
-        </div>
-
-        <div>
-            <p class="text-xs text-gray-400">Time Out</p>
-
-            <p class="font-semibold text-gray-800">
-                {{ $todayAttendance?->time_out
-                    ? \Carbon\Carbon::parse($todayAttendance->time_out)->format('h:i A')
-                    : '—' }}
-            </p>
-        </div>
-
-        <div>
-            <p class="text-xs text-gray-400">Status</p>
-
-            <p class="font-semibold text-gray-800">
-                {{ $todayAttendance?->status ?? 'Not Checked In' }}
-            </p>
-        </div>
-
-    </div>
-
-</div>
-
-    {{-- Employee Information --}}
-    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
             <div>
                 <p class="text-xs uppercase tracking-wide text-gray-400">
-                    Employee
+                    Today's Attendance
                 </p>
 
                 <h2 class="text-lg font-semibold text-gray-800 mt-1">
-                    {{ $employee->first_name }} {{ $employee->last_name }}
+                    {{ now()->format('F d, Y') }}
                 </h2>
+            </div>
 
-                <p class="text-sm text-gray-500">
-                    Employee No: {{ $employee->employee_no }}
+            <div class="flex gap-3">
+
+                @if(!$todayAttendance)
+
+                    <form action="{{ route('my-attendance.check-in') }}" method="POST">
+                        @csrf
+
+                        <button
+                            type="submit"
+                            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium shadow-sm transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            Check In
+                        </button>
+                    </form>
+
+                @elseif(!$todayAttendance->time_out)
+
+                    <form action="{{ route('my-attendance.check-out') }}" method="POST">
+                        @csrf
+
+                        <button
+                            type="submit"
+                            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-medium shadow-sm transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                            Check Out
+                        </button>
+                    </form>
+
+                @else
+
+                    <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 text-emerald-700 text-sm font-medium">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Attendance Completed
+                    </span>
+
+                @endif
+
+            </div>
+
+        </div>
+
+        <div class="grid grid-cols-3 gap-4 mt-6">
+
+            <div class="bg-gray-50 rounded-xl p-4">
+                <p class="text-[10px] text-gray-400 uppercase tracking-wide">Time In</p>
+                <p class="font-semibold text-gray-800 mt-1">
+                    {{ $todayAttendance?->time_in
+                        ? \Carbon\Carbon::parse($todayAttendance->time_in)->format('h:i A')
+                        : '—' }}
                 </p>
             </div>
 
-            <div class="text-right">
-                <p class="text-xs text-gray-400">
-                    Department
+            <div class="bg-gray-50 rounded-xl p-4">
+                <p class="text-[10px] text-gray-400 uppercase tracking-wide">Time Out</p>
+                <p class="font-semibold text-gray-800 mt-1">
+                    {{ $todayAttendance?->time_out
+                        ? \Carbon\Carbon::parse($todayAttendance->time_out)->format('h:i A')
+                        : '—' }}
                 </p>
+            </div>
 
-                <p class="text-sm font-medium text-gray-700">
-                    {{ $employee->department }}
+            <div class="bg-gray-50 rounded-xl p-4">
+                <p class="text-[10px] text-gray-400 uppercase tracking-wide">Status</p>
+                <p class="font-semibold text-gray-800 mt-1">
+                    {{ $todayAttendance?->status ?? 'Not Checked In' }}
                 </p>
             </div>
 
         </div>
+
     </div>
 
     {{-- Attendance Table --}}
-    <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm">
 
-        <div class="px-5 py-4 border-b border-gray-100">
-            <h2 class="font-semibold text-gray-800">
+        <div class="px-6 py-4 border-b border-gray-100">
+            <h2 class="font-bold text-gray-800">
                 Attendance History
             </h2>
         </div>
@@ -137,57 +112,46 @@
 
             <table class="w-full text-sm">
 
-                <thead class="bg-gray-50 text-gray-500">
+                <thead class="bg-gray-50 text-gray-400 uppercase text-xs">
                     <tr>
-                        <th class="px-5 py-3 text-left font-medium">
-                            Date
-                        </th>
-
-                        <th class="px-5 py-3 text-left font-medium">
-                            Time In
-                        </th>
-
-                        <th class="px-5 py-3 text-left font-medium">
-                            Time Out
-                        </th>
-
-                        <th class="px-5 py-3 text-left font-medium">
-                            Status
-                        </th>
+                        <th class="text-left px-6 py-3">Date</th>
+                        <th class="text-left px-6 py-3">Time In</th>
+                        <th class="text-left px-6 py-3">Time Out</th>
+                        <th class="text-left px-6 py-3">Status</th>
                     </tr>
                 </thead>
 
-                <tbody class="divide-y divide-gray-100">
+                <tbody>
 
                     @forelse($attendances as $attendance)
 
-                        <tr class="hover:bg-gray-50">
+                        <tr class="border-b border-gray-50 hover:bg-gray-50">
 
-                            <td class="px-5 py-4">
+                            <td class="px-6 py-4 text-gray-600">
                                 {{ \Carbon\Carbon::parse($attendance->attendance_date)->format('M d, Y') }}
                             </td>
 
-                            <td class="px-5 py-4">
+                            <td class="px-6 py-4 text-gray-600">
                                 {{ $attendance->time_in ?? '—' }}
                             </td>
 
-                            <td class="px-5 py-4">
+                            <td class="px-6 py-4 text-gray-600">
                                 {{ $attendance->time_out ?? '—' }}
                             </td>
 
-                            <td class="px-5 py-4">
+                            <td class="px-6 py-4">
 
                                 @php
-                                    $statusClass = match($attendance->status) {
-                                        'Present' => 'bg-green-100 text-green-700',
-                                        'Late' => 'bg-yellow-100 text-yellow-700',
-                                        'Absent' => 'bg-red-100 text-red-700',
-                                        'Leave' => 'bg-blue-100 text-blue-700',
-                                        default => 'bg-gray-100 text-gray-600',
-                                    };
+                                    $statusStyles = [
+                                        'Present' => 'bg-emerald-50 text-emerald-600',
+                                        'Late' => 'bg-amber-50 text-amber-600',
+                                        'Absent' => 'bg-red-50 text-red-500',
+                                        'Leave' => 'bg-indigo-50 text-indigo-500',
+                                    ];
+                                    $style = $statusStyles[$attendance->status] ?? 'bg-gray-100 text-gray-600';
                                 @endphp
 
-                                <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium {{ $statusClass }}">
+                                <span class="px-2.5 py-1 rounded-full text-xs font-medium {{ $style }}">
                                     {{ $attendance->status }}
                                 </span>
 
@@ -198,7 +162,7 @@
                     @empty
 
                         <tr>
-                            <td colspan="4" class="px-5 py-10 text-center text-gray-400">
+                            <td colspan="4" class="text-center py-12 text-gray-400">
                                 No attendance records found.
                             </td>
                         </tr>
@@ -212,7 +176,7 @@
         </div>
 
         @if($attendances->hasPages())
-            <div class="px-5 py-4 border-t border-gray-100">
+            <div class="px-6 py-4 border-t border-gray-100">
                 {{ $attendances->links() }}
             </div>
         @endif

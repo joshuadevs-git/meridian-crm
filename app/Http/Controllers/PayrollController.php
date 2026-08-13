@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Payroll;
 use App\Models\Employee;
+use App\Models\Attendance;
 use Illuminate\Http\Request;
 use App\Exports\PayrollReportExport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -197,6 +199,206 @@ public function myPayroll()
         ->paginate(10);
 
     return view('employee.payroll', compact('employee', 'payrolls'));
+}
+
+public function generate(Request $request)
+{
+    $request->validate([
+        'payroll_date' => 'required|date',
+    ]);
+
+    $payrollDate = Carbon::parse($request->payroll_date);
+
+    $year = $payrollDate->year;
+    $month = $payrollDate->month;
+
+    /*
+    |--------------------------------------------------------------------------
+    | Get active employees
+    |--------------------------------------------------------------------------
+    */
+
+    $employees = Employee::where('is_active', true)
+        ->get();
+
+    if ($employees->isEmpty()) {
+        return back()
+            ->with('error', 'No active employees found.');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Count Monday-Friday working days
+    |--------------------------------------------------------------------------
+    */
+
+    $workingDays = 0;
+
+    $date = Carbon::create($year, $month, 1);
+
+    while ($date->month === $month) {
+
+        if ($date->isWeekday()) {
+            $workingDays++;
+        }
+
+        $date->addDay();
+    }
+
+    if ($workingDays <= 0) {
+        return back()
+            ->with('error', 'No working days found for this month.');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Generate payroll for every employee
+    |--------------------------------------------------------------------------
+    */
+
+    foreach ($employees as $employee) {
+
+        $basicSalary = (float) ($employee->salary ?? 0);
+
+        if ($basicSalary <= 0) {
+            continue;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Prevent duplicate payroll for same employee/month
+        |--------------------------------------------------------------------------
+        */
+
+        $alreadyExists = Payroll::where('employee_id', $employee->id)
+            ->whereYear('payroll_date', $year)
+            ->whereMonth('payroll_date', $month)
+            ->exists();
+
+        if ($alreadyExists) {
+            continue;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Daily rate
+        |--------------------------------------------------------------------------
+        */
+
+        $dailyRate = $basicSalary / $workingDays;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Get attendance records
+        |--------------------------------------------------------------------------
+        */
+
+        $attendances = Attendance::where('employee_id', $employee->id)
+            ->whereYear('attendance_date', $year)
+            ->whereMonth('attendance_date', $month)
+            ->get();
+
+        $absentDays = $attendances
+            ->where('status', 'Absent')
+            ->count();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Calculate late minutes
+        |--------------------------------------------------------------------------
+        |
+        | Assumption:
+        | Regular work starts at 8:00 AM.
+        |
+        */
+
+        $lateMinutes = 0;
+
+        foreach ($attendances as $attendance) {
+
+            if (!$attendance->time_in) {
+                continue;
+            }
+
+            if ($attendance->status !== 'Late') {
+                continue;
+            }
+
+            $timeIn = Carbon::parse($attendance->time_in);
+
+            $scheduledTime = Carbon::create(
+                $timeIn->year,
+                $timeIn->month,
+                $timeIn->day,
+                8,
+                0,
+                0
+            );
+
+            if ($timeIn->greaterThan($scheduledTime)) {
+
+                $lateMinutes += $scheduledTime->diffInMinutes($timeIn);
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Calculate deductions
+        |--------------------------------------------------------------------------
+        */
+
+        // Absent deduction
+        $absentDeduction = $dailyRate * $absentDays;
+
+        // Hourly rate
+        $hourlyRate = $dailyRate / 8;
+
+        // Per-minute rate
+        $minuteRate = $hourlyRate / 60;
+
+        // Late deduction
+        $lateDeduction = $minuteRate * $lateMinutes;
+
+        // Total deduction
+        $totalDeduction = $absentDeduction + $lateDeduction;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Net salary
+        |--------------------------------------------------------------------------
+        */
+
+        $allowance = 0;
+
+        $netSalary =
+            $basicSalary
+            + $allowance
+            - $totalDeduction;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Create payroll
+        |--------------------------------------------------------------------------
+        */
+
+        Payroll::create([
+            'employee_id' => $employee->id,
+            'payroll_date' => $payrollDate->toDateString(),
+            'basic_salary' => $basicSalary,
+            'allowance' => $allowance,
+            'deduction' => round($totalDeduction, 2),
+            'net_salary' => round($netSalary, 2),
+        ]);
+    }
+
+    return redirect()
+        ->route('payrolls.index')
+        ->with(
+            'success',
+            'Payroll generated successfully for ' .
+            $payrollDate->format('F Y') .
+            '.'
+        );
 }
 
 }

@@ -14,7 +14,7 @@
         </div>
 
         <a href="{{ route('branches.create') }}"
-           class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl shadow-sm transition">
+           class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-small px-4 py-2.5 rounded-xl shadow-sm transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
@@ -29,7 +29,6 @@
 
             <thead class="bg-gray-50 text-gray-400 uppercase text-xs">
                 <tr>
-                    <th class="text-left px-6 py-3">ID</th>
                     <th class="text-left px-6 py-3">Code</th>
                     <th class="text-left px-6 py-3">Name</th>
                     <th class="text-left px-6 py-3">Status</th>
@@ -43,7 +42,6 @@
 
                 <tr class="border-b border-gray-50 hover:bg-gray-50">
 
-                    <td class="px-6 py-4 text-gray-500">#{{ $branch->id }}</td>
                     <td class="px-6 py-4 text-gray-600 font-mono text-xs">{{ $branch->code }}</td>
                     <td class="px-6 py-4 font-medium text-gray-800">{{ $branch->name }}</td>
 

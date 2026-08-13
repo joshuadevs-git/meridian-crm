@@ -1,6 +1,6 @@
 @extends('layouts.crm')
 
-@section('title', 'My Leaves')
+@section('title', '')
 
 @section('content')
 
@@ -27,21 +27,6 @@
     </a>
 
 </div>
-
-    {{-- Employee Information --}}
-    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-        <p class="text-xs uppercase tracking-wide text-gray-400">
-            Employee
-        </p>
-
-        <h2 class="text-lg font-semibold text-gray-800 mt-1">
-            {{ $employee->first_name }} {{ $employee->last_name }}
-        </h2>
-
-        <p class="text-sm text-gray-500">
-            Employee No: {{ $employee->employee_no }}
-        </p>
-    </div>
 
     {{-- Leave Table --}}
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">

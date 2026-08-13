@@ -17,10 +17,10 @@ class Attendance extends Model
     ];
 
     protected $casts = [
-    'attendance_date' => 'date',
-    'time_in' => 'datetime:H:i',
-    'time_out' => 'datetime:H:i',
-];
+        'attendance_date' => 'date',
+        'time_in' => 'datetime:H:i',
+        'time_out' => 'datetime:H:i',
+    ];
 
     public function employee(): BelongsTo
     {

@@ -123,11 +123,16 @@ class EmployeeController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreEmployeeRequest $request)
+   public function store(StoreEmployeeRequest $request)
 {
     $data = $request->validated();
 
-    // Prevent duplicate user account
+    /*
+    |--------------------------------------------------------------------------
+    | Check if email already exists in users table
+    |--------------------------------------------------------------------------
+    */
+
     if (User::where('email', $data['email'])->exists()) {
         return back()
             ->withInput()
@@ -136,42 +141,95 @@ class EmployeeController extends Controller
             ]);
     }
 
-    // Generate temporary password
-    $temporaryPassword = Str::random(10);
+    /*
+    |--------------------------------------------------------------------------
+    | Find Employee Role
+    |--------------------------------------------------------------------------
+    */
 
-    // Find Employee role
     $employeeRole = Role::where('name', 'Employee')->first();
 
     if (!$employeeRole) {
         return back()
             ->withInput()
             ->withErrors([
-                'email' => 'Employee role does not exist. Please create the Employee role first.'
+                'email' => 'Employee role does not exist.'
             ]);
     }
 
-    // Create login account
-    $user = User::create([
-        'name' => $data['first_name'] . ' ' . $data['last_name'],
-        'email' => $data['email'],
-        'password' => Hash::make($temporaryPassword),
-        'role_id' => $employeeRole->id,
-        'must_change_password' => true,
-    ]);
+    /*
+    |--------------------------------------------------------------------------
+    | Generate Temporary Password
+    |--------------------------------------------------------------------------
+    */
 
-    // Automatically connect employee to account
-    $data['user_id'] = $user->id;
+    $temporaryPassword = Str::random(16);
 
-    $employee = Employee::create($data);
+    /*
+    |--------------------------------------------------------------------------
+    | Create User + Employee Together
+    |--------------------------------------------------------------------------
+    */
 
-    // Store temporary password in session so Admin/HR can see it once
-    session()->flash('temporary_password', $temporaryPassword);
-    session()->flash('created_employee_name', $employee->first_name . ' ' . $employee->last_name);
-    session()->flash('created_employee_email', $employee->email);
+    try {
+
+        DB::beginTransaction();
+
+        /*
+        | Create login account
+        */
+
+        $user = User::create([
+            'name' => $data['first_name'] . ' ' . $data['last_name'],
+            'email' => $data['email'],
+            'password' => Hash::make($temporaryPassword),
+            'role_id' => $employeeRole->id,
+            'must_change_password' => true,
+        ]);
+
+        /*
+        | Connect Employee to User
+        */
+
+        $data['user_id'] = $user->id;
+
+        /*
+        | Create Employee
+        */
+
+        $employee = Employee::create($data);
+
+        DB::commit();
+
+    } catch (\Throwable $e) {
+
+        DB::rollBack();
+
+        return back()
+            ->withInput()
+            ->withErrors([
+                'email' => 'Employee could not be created. ' . $e->getMessage()
+            ]);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Redirect to Employee List
+    |--------------------------------------------------------------------------
+    */
 
     return redirect()
         ->route('employees.index')
-        ->with('success', 'Employee and login account created successfully.');
+        ->with('success', 'Employee and login account created successfully.')
+        ->with('temporary_password', $temporaryPassword)
+        ->with(
+            'created_employee_name',
+            $employee->first_name . ' ' . $employee->last_name
+        )
+        ->with(
+            'created_employee_email',
+            $employee->email
+        );
 }
 
     /**
@@ -261,6 +319,77 @@ public function myProfile()
     $employee->load('branch');
 
     return view('employee.profile', compact('employee'));
+}
+
+
+public function rules(): array
+{
+    return [
+        'employee_no' => [
+            'required',
+            'string',
+            'max:50',
+            'unique:employees,employee_no',
+        ],
+
+        'first_name' => [
+            'required',
+            'string',
+            'max:255',
+        ],
+
+        'last_name' => [
+            'required',
+            'string',
+            'max:255',
+        ],
+
+        'email' => [
+            'required',
+            'email',
+            'max:255',
+            'unique:employees,email',
+            'unique:users,email',
+        ],
+
+        'phone' => [
+            'nullable',
+            'string',
+            'max:20',
+        ],
+
+        'branch_id' => [
+            'required',
+            'exists:branches,id',
+        ],
+
+        'position' => [
+            'required',
+            'string',
+            'max:255',
+        ],
+
+        'department' => [
+            'required',
+            'string',
+            'max:255',
+        ],
+
+        'hire_date' => [
+            'required',
+            'date',
+        ],
+
+        'salary' => [
+            'nullable',
+            'numeric',
+            'min:0',
+        ],
+
+        'is_active' => [
+            'boolean',
+        ],
+    ];
 }
 
 }

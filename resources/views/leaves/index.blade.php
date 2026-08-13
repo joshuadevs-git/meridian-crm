@@ -14,7 +14,7 @@
         </div>
 
         <a href="{{ route('leaves.create') }}"
-           class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl shadow-sm transition">
+           class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-small px-4 py-2.5 rounded-xl shadow-sm transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
@@ -23,30 +23,133 @@
 
     </div>
 
-    {{-- Stat Cards --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 p-6 border-b border-gray-100">
+   {{-- Filters --}}
+<div class="p-6 border-b border-gray-100 bg-gray-50/50">
 
-        <div class="bg-gray-50 rounded-xl p-5">
-            <h3 class="text-gray-400 text-xs uppercase tracking-wide">Total Leaves</h3>
-            <p class="text-2xl font-bold mt-1 text-gray-800">{{ $totalLeaves }}</p>
+    <form
+        id="filterForm"
+        method="GET"
+        action="{{ route('leaves.index') }}">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+
+            {{-- Search --}}
+            <input
+                id="searchInput"
+                type="text"
+                name="search"
+                value="{{ $search }}"
+                placeholder="Search employee..."
+                class="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200">
+
+            {{-- Branch --}}
+            <select
+                id="branchSelect"
+                name="branch"
+                class="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200">
+
+                <option value="">All Branches</option>
+
+                @foreach($branches as $item)
+                    <option
+                        value="{{ $item->id }}"
+                        {{ $branch == $item->id ? 'selected' : '' }}>
+                        {{ $item->name }}
+                    </option>
+                @endforeach
+
+            </select>
+
+            {{-- Leave Type --}}
+            <select
+                id="leaveTypeSelect"
+                name="leave_type"
+                class="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200">
+
+                <option value="">All Leave Types</option>
+
+                @foreach($leaveTypes as $type)
+                    <option
+                        value="{{ $type }}"
+                        {{ $leaveType == $type ? 'selected' : '' }}>
+                        {{ $type }}
+                    </option>
+                @endforeach
+
+            </select>
+
+            {{-- Status --}}
+            <select
+                id="statusSelect"
+                name="status"
+                class="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200">
+
+                <option value="">All Status</option>
+
+                <option
+                    value="Pending"
+                    {{ $status == 'Pending' ? 'selected' : '' }}>
+                    Pending
+                </option>
+
+                <option
+                    value="Approved"
+                    {{ $status == 'Approved' ? 'selected' : '' }}>
+                    Approved
+                </option>
+
+                <option
+                    value="Rejected"
+                    {{ $status == 'Rejected' ? 'selected' : '' }}>
+                    Rejected
+                </option>
+
+            </select>
+
+            {{-- Sort --}}
+            <select
+                id="sortSelect"
+                name="sort"
+                class="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200">
+
+                <option value="latest" {{ $sort == 'latest' ? 'selected' : '' }}>
+                    Newest First
+                </option>
+
+                <option value="oldest" {{ $sort == 'oldest' ? 'selected' : '' }}>
+                    Oldest First
+                </option>
+
+                <option value="start_new" {{ $sort == 'start_new' ? 'selected' : '' }}>
+                    Start Date (Newest)
+                </option>
+
+                <option value="start_old" {{ $sort == 'start_old' ? 'selected' : '' }}>
+                    Start Date (Oldest)
+                </option>
+
+                <option value="end_new" {{ $sort == 'end_new' ? 'selected' : '' }}>
+                    End Date (Newest)
+                </option>
+
+                <option value="end_old" {{ $sort == 'end_old' ? 'selected' : '' }}>
+                    End Date (Oldest)
+                </option>
+
+            </select>
+
+            {{-- Clear --}}
+            <a
+                href="{{ route('leaves.index') }}"
+                class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg flex items-center justify-center transition">
+                Clear Filters
+            </a>
+
         </div>
 
-        <div class="bg-amber-50 rounded-xl p-5">
-            <h3 class="text-amber-600 text-xs uppercase tracking-wide">Pending</h3>
-            <p class="text-2xl font-bold mt-1 text-amber-700">{{ $pendingLeaves }}</p>
-        </div>
+    </form>
 
-        <div class="bg-emerald-50 rounded-xl p-5">
-            <h3 class="text-emerald-600 text-xs uppercase tracking-wide">Approved</h3>
-            <p class="text-2xl font-bold mt-1 text-emerald-700">{{ $approvedLeaves }}</p>
-        </div>
-
-        <div class="bg-red-50 rounded-xl p-5">
-            <h3 class="text-red-500 text-xs uppercase tracking-wide">Rejected</h3>
-            <p class="text-2xl font-bold mt-1 text-red-600">{{ $rejectedLeaves }}</p>
-        </div>
-
-    </div>
+</div>
 
     <div class="overflow-x-auto">
 
@@ -162,3 +265,52 @@
 </div>
 
 @endsection
+
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const form = document.getElementById('filterForm');
+
+        const filters = [
+            'searchInput',
+            'branchSelect',
+            'leaveTypeSelect',
+            'statusSelect',
+            'sortSelect'
+        ];
+
+        filters.forEach(function (id) {
+
+            const element = document.getElementById(id);
+
+            if (!element) {
+                return;
+            }
+
+            element.addEventListener('change', function () {
+                form.submit();
+            });
+
+        });
+
+        const searchInput = document.getElementById('searchInput');
+
+        if (searchInput) {
+            let timeout;
+
+            searchInput.addEventListener('input', function () {
+
+                clearTimeout(timeout);
+
+                timeout = setTimeout(function () {
+                    form.submit();
+                }, 500);
+
+            });
+        }
+
+    });
+</script>
+@endpush

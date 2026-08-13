@@ -1,6 +1,6 @@
 @extends('layouts.crm')
 
-@section('title', 'User Management')
+@section('title', '')
 
 @section('content')
 
@@ -19,7 +19,7 @@
         </div>
 
         <a href="{{ route('users.create') }}"
-           class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-medium shadow-sm">
+           class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-small shadow-sm">
             + Add User
         </a>
 

@@ -156,87 +156,225 @@
 
         </nav>
 
-        {{-- Account --}}
-        <div class="px-4 py-3 border-t border-gray-100 space-y-1">
-
-            <a href="{{ route('my-profile') }}"
-   class="{{ $navClass('my-profile') }}">
-    My Profile
-</a>
-
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-
-                <button
-                    type="submit"
-                    class="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-red-500 hover:bg-red-50 transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                    </svg>
-                    Logout
-                </button>
-            </form>
-
-        </div>
-
-        {{-- Bottom promo card --}}
-        <div class="p-4">
-            <div class="bg-emerald-600 rounded-2xl p-4 text-white text-center">
-                <p class="text-sm font-semibold">Need help?</p>
-                <p class="text-xs text-emerald-100 mt-1 mb-3">Check our documentation or contact support.</p>
-                <a href="#" class="block bg-white text-emerald-700 text-xs font-semibold rounded-lg py-2 hover:bg-emerald-50 transition">
-                    Get Support
-                </a>
-            </div>
-        </div>
 
     </aside>
 
     {{-- Main Content --}}
     <div class="flex-1 flex flex-col min-w-0">
 
-        {{-- Navbar --}}
-        <header class="bg-white border-b border-gray-100 px-8 py-4">
+       {{-- Navbar --}}
+<header class="bg-white border-b border-gray-100 px-8 py-4">
 
-            <div class="flex justify-between items-center gap-4">
+    <div class="flex justify-between items-center gap-4">
 
-                <div>
-                    <h1 class="text-xl font-bold text-gray-800">@yield('title')</h1>
-                </div>
+        {{-- Page Title --}}
+        <div>
+            <h1 class="text-xl font-bold text-gray-800">
+                @yield('title')
+            </h1>
+        </div>
 
-                <div class="flex-1 max-w-md hidden md:block">
-                    <div class="relative">
-                        <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/>
-                        </svg>
-                        <input type="text" placeholder="Search..."
-                               class="w-full bg-gray-50 border border-gray-100 rounded-xl pl-9 pr-4 py-2 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-200">
+
+        {{-- Search --}}
+        <div class="flex-1 max-w-md hidden md:block">
+
+            <div class="relative">
+
+                <svg
+                    class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24">
+
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/>
+
+                </svg>
+
+                <input
+                    type="text"
+                    placeholder="Search..."
+                    class="w-full bg-gray-50 border border-gray-100 rounded-xl pl-9 pr-4 py-2 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-200">
+
+            </div>
+
+        </div>
+
+
+        {{-- Right Side --}}
+        <div class="flex items-center gap-5">
+
+
+            {{-- Notifications --}}
+            <button
+                type="button"
+                class="relative text-gray-400 hover:text-gray-600 transition">
+
+                <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24">
+
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+
+                </svg>
+
+                <span
+                    class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full">
+                </span>
+
+            </button>
+
+
+            {{-- User Dropdown --}}
+            <div
+                class="relative"
+                x-data="{ open: false }">
+
+
+                {{-- User Button --}}
+                <button
+                    type="button"
+                    @click="open = !open"
+                    @click.outside="open = false"
+                    class="flex items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-gray-50 transition">
+
+                    {{-- Avatar --}}
+                    <div
+                        class="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm font-bold uppercase">
+
+                        {{ substr(Auth::user()->name, 0, 1) }}
+
                     </div>
-                </div>
 
-                <div class="flex items-center gap-4">
 
-                    <button class="relative text-gray-400 hover:text-gray-600">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                        </svg>
-                        <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                    </button>
+                    {{-- Name --}}
+                    <div class="hidden sm:block text-left">
 
-                    <div class="flex items-center gap-2">
-                        <div class="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm font-bold uppercase">
-                            {{ substr(Auth::user()->name, 0, 1) }}
-                        </div>
-                        <span class="text-sm font-medium text-gray-700 hidden sm:block">
+                        <p class="text-sm font-medium text-gray-700">
                             {{ Auth::user()->name }}
-                        </span>
+                        </p>
+
+                        <p class="text-xs text-gray-400">
+                            {{ Auth::user()->role->name ?? 'User' }}
+                        </p>
+
                     </div>
+
+
+                    {{-- Arrow --}}
+                    <svg
+                        class="w-4 h-4 text-gray-400 transition-transform"
+                        :class="{ 'rotate-180': open }"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24">
+
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M19 9l-7 7-7-7"/>
+
+                    </svg>
+
+                </button>
+
+
+                {{-- Dropdown --}}
+                <div
+                    x-show="open"
+                    x-transition
+                    class="absolute right-0 mt-2 w-56 bg-white rounded-xl border border-gray-100 shadow-lg z-50 overflow-hidden"
+                    style="display: none;">
+
+
+                    {{-- User Information --}}
+                    <div class="px-4 py-3 border-b border-gray-100">
+
+                        <p class="text-sm font-semibold text-gray-800">
+                            {{ Auth::user()->name }}
+                        </p>
+
+                        <p class="text-xs text-gray-400 mt-0.5">
+                            {{ Auth::user()->email }}
+                        </p>
+
+                    </div>
+
+
+                    {{-- Profile --}}
+                    <a
+                        href="{{ route('my-profile') }}"
+                        class="flex items-center gap-3 px-4 py-3 text-sm text-gray-600 hover:bg-gray-50 transition">
+
+                        <svg
+                            class="w-5 h-5 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24">
+
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M5.121 17.804A9 9 0 1018.88 17.8M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+
+                        </svg>
+
+                        My Profile
+
+                    </a>
+
+
+                    {{-- Logout --}}
+                    <form
+                        method="POST"
+                        action="{{ route('logout') }}">
+
+                        @csrf
+
+                        <button
+                            type="submit"
+                            class="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-500 hover:bg-red-50 transition">
+
+                            <svg
+                                class="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24">
+
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+
+                            </svg>
+
+                            Logout
+
+                        </button>
+
+                    </form>
 
                 </div>
 
             </div>
 
-        </header>
+        </div>
+
+    </div>
+
+</header>
 
         {{-- Page Content --}}
         <main class="p-8 flex-1">

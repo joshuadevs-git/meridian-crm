@@ -190,6 +190,9 @@ Route::middleware(['auth'])->group(function () {
         |--------------------------------------------------------------------------
         */
 
+        Route::post('/payrolls/generate', [PayrollController::class, 'generate'])
+         ->name('payrolls.generate');
+
         Route::resource('payrolls', PayrollController::class);
 
 

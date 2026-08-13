@@ -3,31 +3,103 @@
 namespace App\Http\Controllers;
 
 use App\Models\Leave;
+use App\Models\Branch;
 use App\Models\Employee;
-use App\Http\Requests\StoreLeaveRequest;
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreLeaveRequest;
 
 class LeaveController extends Controller
 {
-    public function index()
-    {
-        $leaves = Leave::with('employee')
-            ->latest()
-            ->paginate(10);
+    public function index(Request $request)
+{
+    $search = $request->search;
+    $branch = $request->branch;
+    $leaveType = $request->leave_type;
+    $status = $request->status;
+    $sort = $request->sort ?? 'latest';
 
-        $totalLeaves = Leave::count();
-        $pendingLeaves = Leave::where('status', 'Pending')->count();
-        $approvedLeaves = Leave::where('status', 'Approved')->count();
-        $rejectedLeaves = Leave::where('status', 'Rejected')->count();
+    $leaves = Leave::with('employee.branch')
 
-        return view('leaves.index', compact(
-            'leaves',
-            'totalLeaves',
-            'pendingLeaves',
-            'approvedLeaves',
-            'rejectedLeaves'
-        ));
+        ->when($search, function ($query) use ($search) {
+            $query->whereHas('employee', function ($q) use ($search) {
+                $q->where('employee_no', 'like', "%{$search}%")
+                    ->orWhere('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%");
+            });
+        })
+
+        ->when($branch, function ($query) use ($branch) {
+            $query->whereHas('employee', function ($q) use ($branch) {
+                $q->where('branch_id', $branch);
+            });
+        })
+
+        ->when($leaveType, function ($query) use ($leaveType) {
+            $query->where('leave_type', $leaveType);
+        })
+
+        ->when($status, function ($query) use ($status) {
+            $query->where('status', $status);
+        });
+
+    switch ($sort) {
+
+        case 'oldest':
+            $leaves->oldest();
+            break;
+
+        case 'start_new':
+            $leaves->orderByDesc('start_date');
+            break;
+
+        case 'start_old':
+            $leaves->orderBy('start_date');
+            break;
+
+        case 'end_new':
+            $leaves->orderByDesc('end_date');
+            break;
+
+        case 'end_old':
+            $leaves->orderBy('end_date');
+            break;
+
+        default:
+            $leaves->latest();
+            break;
     }
+
+    $leaves = $leaves
+        ->paginate(10)
+        ->withQueryString();
+
+    $branches = Branch::orderBy('name')->get();
+
+    $leaveTypes = Leave::select('leave_type')
+        ->distinct()
+        ->orderBy('leave_type')
+        ->pluck('leave_type');
+
+    $totalLeaves = Leave::count();
+    $pendingLeaves = Leave::where('status', 'Pending')->count();
+    $approvedLeaves = Leave::where('status', 'Approved')->count();
+    $rejectedLeaves = Leave::where('status', 'Rejected')->count();
+
+    return view('leaves.index', compact(
+        'leaves',
+        'branches',
+        'leaveTypes',
+        'search',
+        'branch',
+        'leaveType',
+        'status',
+        'sort',
+        'totalLeaves',
+        'pendingLeaves',
+        'approvedLeaves',
+        'rejectedLeaves'
+    ));
+}
 
     public function create()
     {

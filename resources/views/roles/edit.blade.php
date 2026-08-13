@@ -1,6 +1,6 @@
 @extends('layouts.crm')
 
-@section('title', 'Edit Role')
+@section('title', '')
 
 @section('content')
 

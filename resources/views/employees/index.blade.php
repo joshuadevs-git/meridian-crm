@@ -4,64 +4,6 @@
 
 @section('content')
 
-@if(session('temporary_password'))
-
-    <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-5">
-
-        <div class="flex items-start justify-between gap-4">
-
-            <div>
-                <h3 class="font-semibold text-amber-800">
-                    Employee Account Created
-                </h3>
-
-                <p class="text-sm text-amber-700 mt-1">
-                    Login credentials for
-                    <strong>{{ session('created_employee_name') }}</strong>
-                </p>
-
-                <p class="text-sm text-amber-700">
-                    Email: {{ session('created_employee_email') }}
-                </p>
-            </div>
-
-        </div>
-
-        <div class="mt-4">
-
-            <label class="block text-xs font-medium text-amber-700 mb-1">
-                Temporary Password
-            </label>
-
-            <div class="flex gap-2">
-
-                <input
-                    id="temporaryPassword"
-                    type="text"
-                    readonly
-                    value="{{ session('temporary_password') }}"
-                    class="flex-1 rounded-lg border border-amber-300 bg-white px-3 py-2 text-sm font-mono"
-                >
-
-                <button
-                    type="button"
-                    onclick="copyTemporaryPassword()"
-                    class="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium"
-                >
-                    📋 Copy
-                </button>
-
-            </div>
-
-            <p class="text-xs text-amber-600 mt-2">
-                Save this password now. It will not be displayed again.
-            </p>
-
-        </div>
-
-    </div>
-
-@endif
 
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
 
@@ -75,7 +17,7 @@
         <div class="flex flex-wrap items-center gap-2">
 
             <a href="{{ route('employees.export') }}"
-               class="inline-flex items-center gap-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 text-sm font-medium px-4 py-2.5 rounded-xl transition">
+               class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-small px-4 py-2.5 rounded-xl transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/>
                 </svg>
@@ -98,13 +40,13 @@
 
                 <button
                     type="submit"
-                    class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shrink-0">
+                    class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-small px-4 py-2.5 rounded-xl transition shrink-0">
                     Import
                 </button>
             </form>
 
             <a href="{{ route('employees.create') }}"
-               class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2.5 rounded-xl shadow-sm transition shrink-0">
+               class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-small px-4 py-2.5 rounded-xl shadow-sm transition shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
@@ -177,7 +119,7 @@
 
                 <a
                     href="{{ route('employees.index') }}"
-                    class="bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg flex items-center justify-center transition">
+                    class="bg-emerald-600  hover:bg-emerald-700 text-white text-sm font-medium rounded-lg flex items-center justify-center transition">
                     Clear Filters
                 </a>
 
@@ -288,6 +230,271 @@
 
 </div>
 
+
+{{-- ========================================================= --}}
+{{-- Temporary Password Modal --}}
+{{-- ========================================================= --}}
+
+@if(session()->has('temporary_password'))
+
+    <div
+        id="temporaryPasswordModal"
+        class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+    >
+
+        <div
+            class="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden"
+        >
+
+            {{-- Header --}}
+            <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+
+                <div>
+                    <h2 class="text-lg font-bold text-gray-800">
+                        Employee Account Created
+                    </h2>
+
+                    <p class="text-xs text-gray-400 mt-1">
+                        Save the temporary password before closing.
+                    </p>
+                </div>
+
+                <button
+                    type="button"
+                    onclick="closeTemporaryPasswordModal()"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition"
+                >
+                    ✕
+                </button>
+
+            </div>
+
+
+            {{-- Body --}}
+            <div class="p-6 space-y-5">
+
+                {{-- Success --}}
+                <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-4">
+
+                    <p class="text-sm font-semibold text-emerald-700">
+                        ✓ Login account successfully created.
+                    </p>
+
+                    <p class="text-xs text-emerald-600 mt-1">
+                        The employee must change this password on first login.
+                    </p>
+
+                </div>
+
+
+                {{-- Employee --}}
+                <div>
+
+                    <p class="text-xs uppercase tracking-wide text-gray-400">
+                        Employee
+                    </p>
+
+                    <p class="text-sm font-semibold text-gray-800 mt-1">
+                        {{ session('created_employee_name') }}
+                    </p>
+
+                </div>
+
+
+                {{-- Email --}}
+                <div>
+
+                    <p class="text-xs uppercase tracking-wide text-gray-400">
+                        Login Email
+                    </p>
+
+                    <p class="text-sm text-gray-700 mt-1">
+                        {{ session('created_employee_email') }}
+                    </p>
+
+                </div>
+
+
+                {{-- Temporary Password --}}
+                <div>
+
+                    <p class="text-xs uppercase tracking-wide text-gray-400 mb-2">
+                        Temporary Password
+                    </p>
+
+                    <div class="flex items-center gap-2">
+
+                        <div
+                            id="temporaryPassword"
+                            class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-mono text-sm font-semibold text-gray-800 select-all"
+                        >
+                            {{ session('temporary_password') }}
+                        </div>
+
+                        <button
+                            type="button"
+                            id="copyPasswordButton"
+                            onclick="copyTemporaryPassword()"
+                            class="px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl transition"
+                        >
+                            Copy
+                        </button>
+
+                    </div>
+
+                    <p
+                        id="copyMessage"
+                        class="hidden text-xs text-emerald-600 mt-2"
+                    >
+                        ✓ Password copied to clipboard.
+                    </p>
+
+                </div>
+
+
+                {{-- Warning --}}
+                <div class="bg-amber-50 border border-amber-100 rounded-xl p-4">
+
+                    <p class="text-xs text-amber-700 leading-relaxed">
+                        <strong>Important:</strong>
+                        This temporary password is displayed only once.
+                        Copy it and securely provide it to the employee.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            {{-- Footer --}}
+            <div class="flex justify-end gap-3 px-6 py-4 bg-gray-50 border-t border-gray-100">
+
+                <button
+                    type="button"
+                    onclick="closeTemporaryPasswordModal()"
+                    class="px-5 py-2.5 bg-white border border-gray-200 hover:bg-gray-100 text-gray-600 text-sm font-medium rounded-xl transition"
+                >
+                    Close
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        function copyTemporaryPassword() {
+
+            const passwordElement =
+                document.getElementById('temporaryPassword');
+
+            const button =
+                document.getElementById('copyPasswordButton');
+
+            const message =
+                document.getElementById('copyMessage');
+
+            if (!passwordElement) {
+                return;
+            }
+
+            const password =
+                passwordElement.innerText.trim();
+
+            navigator.clipboard.writeText(password)
+                .then(function () {
+
+                    button.innerText = 'Copied!';
+
+                    message.classList.remove('hidden');
+
+                    setTimeout(function () {
+
+                        button.innerText = 'Copy';
+
+                        message.classList.add('hidden');
+
+                    }, 2000);
+
+                })
+                .catch(function () {
+
+                    // Fallback for browsers where clipboard API is blocked
+                    const range = document.createRange();
+
+                    range.selectNodeContents(passwordElement);
+
+                    const selection = window.getSelection();
+
+                    selection.removeAllRanges();
+
+                    selection.addRange(range);
+
+                    try {
+                        document.execCommand('copy');
+
+                        button.innerText = 'Copied!';
+
+                        message.classList.remove('hidden');
+
+                    } catch (error) {
+
+                        alert('Please copy the password manually.');
+
+                    }
+
+                    selection.removeAllRanges();
+
+                });
+        }
+
+
+        function closeTemporaryPasswordModal() {
+
+            const modal =
+                document.getElementById('temporaryPasswordModal');
+
+            if (modal) {
+
+                modal.remove();
+
+            }
+
+        }
+
+
+        // Close when clicking outside the modal
+        document
+            .getElementById('temporaryPasswordModal')
+            ?.addEventListener('click', function(event) {
+
+                if (event.target === this) {
+
+                    closeTemporaryPasswordModal();
+
+                }
+
+            });
+
+
+        // Allow ESC key to close
+        document.addEventListener('keydown', function(event) {
+
+            if (event.key === 'Escape') {
+
+                closeTemporaryPasswordModal();
+
+            }
+
+        });
+
+    </script>
+
+@endif
+
 @endsection
 
 @push('scripts')
@@ -323,15 +530,6 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 @endpush
 
-@push('scripts')
-<script>
-function copyTemporaryPassword() {
-    const password = document.getElementById('temporaryPassword').value;
 
-    navigator.clipboard.writeText(password).then(() => {
-        alert('Temporary password copied!');
-    });
-}
-</script>
-@endpush
+
 

@@ -4,8 +4,6 @@
 
 @section('content')
 
-<hr class="my-4">
-
 <div class="min-h-screen bg-gray-50 p-6">
 
     {{-- Page Header --}}
@@ -14,8 +12,6 @@
             <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
             <p class="text-sm text-gray-400 mt-1">Track, manage and forecast your employees with ease</p>
         </div>
-
-        
     </div>
 
     {{-- Top Stat Cards --}}
@@ -103,36 +99,35 @@
     {{-- Middle Section: Analytics + Team + Progress --}}
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-8">
 
-        {{-- Attendance Analytics (bar-style) --}}
+        {{-- Attendance Trend (modern gradient area chart) --}}
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 xl:col-span-1">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="font-bold text-gray-800">Attendance Overview</h2>
+
+            <div class="flex items-center gap-2 mb-1">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <h2 class="font-bold text-gray-800 text-sm uppercase tracking-wide">Attendance Trend</h2>
+            </div>
+            <p class="text-2xl font-bold text-gray-800">{{ $presentToday }} <span class="text-sm font-normal text-gray-400">present today</span></p>
+
+            <div class="grid grid-cols-3 gap-3 mt-4 mb-2">
+                <div class="bg-gray-50 rounded-xl p-3">
+                    <p class="text-[10px] text-gray-400 uppercase tracking-wide">Late</p>
+                    <p class="text-lg font-bold text-amber-500 mt-0.5">{{ $lateToday }}</p>
+                </div>
+                <div class="bg-gray-50 rounded-xl p-3">
+                    <p class="text-[10px] text-gray-400 uppercase tracking-wide">Absent</p>
+                    <p class="text-lg font-bold text-red-500 mt-0.5">{{ $absentToday }}</p>
+                </div>
+                <div class="bg-gray-50 rounded-xl p-3">
+                    <p class="text-[10px] text-gray-400 uppercase tracking-wide">Total</p>
+                    <p class="text-lg font-bold text-gray-800 mt-0.5">{{ $totalAttendance }}</p>
+                </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
-                <div class="bg-gray-50 rounded-xl p-4">
-                    <p class="text-xs text-gray-400 uppercase">Present Today</p>
-                    <p class="text-2xl font-bold text-emerald-600 mt-1">{{ $presentToday }}</p>
-                </div>
-                <div class="bg-gray-50 rounded-xl p-4">
-                    <p class="text-xs text-gray-400 uppercase">Late Today</p>
-                    <p class="text-2xl font-bold text-amber-500 mt-1">{{ $lateToday }}</p>
-                </div>
-                <div class="bg-gray-50 rounded-xl p-4">
-                    <p class="text-xs text-gray-400 uppercase">Absent Today</p>
-                    <p class="text-2xl font-bold text-red-500 mt-1">{{ $absentToday }}</p>
-                </div>
-                <div class="bg-gray-50 rounded-xl p-4">
-                    <p class="text-xs text-gray-400 uppercase">Total Records</p>
-                    <p class="text-2xl font-bold text-gray-800 mt-1">{{ $totalAttendance }}</p>
-                </div>
-            </div>
-
-            <div class="mt-6">
+            <div class="mt-4">
                 <canvas id="attendanceTrendChart"
                         data-labels='@json($dailyLabels)'
                         data-values='@json($dailyCounts)'
-                        height="140"></canvas>
+                        height="150"></canvas>
                 <p class="text-xs text-gray-400 text-center mt-2">Last 7 days attendance</p>
             </div>
         </div>
@@ -140,7 +135,10 @@
         {{-- Recent Employees (Team Collaboration style list) --}}
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 xl:col-span-1">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="font-bold text-gray-800">Recent Employees</h2>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <h2 class="font-bold text-gray-800 text-sm uppercase tracking-wide">Recent Employees</h2>
+                </div>
                 <a href="#" class="text-xs font-medium text-emerald-600 hover:underline">View all</a>
             </div>
 
@@ -169,18 +167,42 @@
             </ul>
         </div>
 
-        {{-- Attendance Status Donut ("Project Progress" style) --}}
+        {{-- Attendance Status Donut (segmented, side legend) --}}
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 xl:col-span-1 flex flex-col">
-            <h2 class="font-bold text-gray-800 mb-4">Attendance Status</h2>
 
-            <div class="flex-1 flex items-center justify-center">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <h2 class="font-bold text-gray-800 text-sm uppercase tracking-wide">Attendance Status</h2>
+            </div>
+
+            <div class="flex-1 flex items-center justify-center relative">
                 <canvas id="attendanceStatusChart"
                         data-labels='@json($statusLabels)'
                         data-values='@json($statusCounts)'
-                        width="220" height="220"></canvas>
+                        width="200" height="200"></canvas>
+
+                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <p class="text-2xl font-bold text-gray-800">{{ array_sum($statusCounts ?? []) }}</p>
+                    <p class="text-[10px] text-gray-400 uppercase tracking-wide">Total</p>
+                </div>
             </div>
 
-            <p class="text-xs text-gray-400 text-center mt-4">Distribution of attendance statuses</p>
+            @php
+                $statusTotal = array_sum($statusCounts ?? []) ?: 1;
+                $statusPalette = ['#059669', '#34d399', '#fbbf24', '#f87171', '#818cf8', '#c084fc'];
+            @endphp
+
+            <div class="grid grid-cols-2 gap-2 mt-4">
+                @foreach(($statusLabels ?? []) as $i => $label)
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full shrink-0" style="background-color: {{ $statusPalette[$i % count($statusPalette)] }}"></span>
+                        <span class="text-xs text-gray-500">{{ $label }}</span>
+                        <span class="text-xs font-semibold text-gray-800 ml-auto">
+                            {{ round((($statusCounts[$i] ?? 0) / $statusTotal) * 100) }}%
+                        </span>
+                    </div>
+                @endforeach
+            </div>
         </div>
 
     </div>
@@ -190,7 +212,10 @@
 
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
             <div class="p-6 border-b border-gray-100">
-                <h2 class="font-bold text-gray-800">Employees Per Branch</h2>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <h2 class="font-bold text-gray-800 text-sm uppercase tracking-wide">Employees Per Branch</h2>
+                </div>
             </div>
 
             <div class="overflow-x-auto">
@@ -225,9 +250,12 @@
             </div>
         </div>
 
-        {{-- Employees per Branch Chart --}}
+        {{-- Employees per Branch Chart (modern gradient bars) --}}
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <h2 class="font-bold text-gray-800 mb-4">Employees Per Branch Chart</h2>
+            <div class="flex items-center gap-2 mb-4">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <h2 class="font-bold text-gray-800 text-sm uppercase tracking-wide">Employees Per Branch</h2>
+            </div>
             <canvas id="branchChart"
                     data-labels='@json($branchLabels)'
                     data-values='@json($branchEmployeeCounts)'
@@ -252,10 +280,14 @@ document.querySelectorAll('.report-filter').forEach(function (input) {
     });
 });
 
-// Chart.js rendering using data attributes set above
+// Chart.js rendering — modern gradient styling
 document.addEventListener('DOMContentLoaded', function () {
     const emerald = '#059669';
-    const palette = ['#059669', '#34d399', '#a7f3d0', '#fbbf24', '#f87171', '#818cf8', '#c084fc'];
+    const emeraldLight = '#34d399';
+    const palette = ['#059669', '#34d399', '#fbbf24', '#f87171', '#818cf8', '#c084fc'];
+
+    Chart.defaults.font.family = "'Inter', 'ui-sans-serif', 'system-ui', sans-serif";
+    Chart.defaults.color = '#9ca3af';
 
     function parseData(canvas) {
         return {
@@ -264,19 +296,53 @@ document.addEventListener('DOMContentLoaded', function () {
         };
     }
 
+    // --- Branch bar chart: gradient, rounded, thin bars ---
     const branchCanvas = document.getElementById('branchChart');
     if (branchCanvas && window.Chart) {
         const { labels, values } = parseData(branchCanvas);
+        const ctx = branchCanvas.getContext('2d');
+
+        const gradient = ctx.createLinearGradient(0, 0, 0, branchCanvas.height || 220);
+        gradient.addColorStop(0, emeraldLight);
+        gradient.addColorStop(1, emerald);
+
         new Chart(branchCanvas, {
             type: 'bar',
             data: {
                 labels,
-                datasets: [{ label: 'Employees', data: values, backgroundColor: emerald, borderRadius: 6 }]
+                datasets: [{
+                    label: 'Employees',
+                    data: values,
+                    backgroundColor: gradient,
+                    borderRadius: 10,
+                    borderSkipped: false,
+                    maxBarThickness: 34,
+                }]
             },
-            options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+            options: {
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#111827',
+                        padding: 10,
+                        cornerRadius: 8,
+                        displayColors: false,
+                    },
+                },
+                scales: {
+                    x: { grid: { display: false }, border: { display: false } },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#f3f4f6' },
+                        border: { display: false },
+                        ticks: { stepSize: 1 },
+                    },
+                },
+            }
         });
     }
 
+    // --- Attendance status donut: segmented, rounded, no default legend ---
     const statusCanvas = document.getElementById('attendanceStatusChart');
     if (statusCanvas && window.Chart) {
         const { labels, values } = parseData(statusCanvas);
@@ -284,15 +350,39 @@ document.addEventListener('DOMContentLoaded', function () {
             type: 'doughnut',
             data: {
                 labels,
-                datasets: [{ data: values, backgroundColor: palette, borderWidth: 0 }]
+                datasets: [{
+                    data: values,
+                    backgroundColor: palette,
+                    borderWidth: 4,
+                    borderColor: '#ffffff',
+                    borderRadius: 6,
+                    hoverOffset: 6,
+                }]
             },
-            options: { plugins: { legend: { position: 'bottom' } }, cutout: '70%' }
+            options: {
+                cutout: '72%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#111827',
+                        padding: 10,
+                        cornerRadius: 8,
+                    },
+                },
+            }
         });
     }
 
+    // --- Attendance trend: smooth gradient area line ---
     const trendCanvas = document.getElementById('attendanceTrendChart');
     if (trendCanvas && window.Chart) {
         const { labels, values } = parseData(trendCanvas);
+        const ctx = trendCanvas.getContext('2d');
+
+        const fill = ctx.createLinearGradient(0, 0, 0, trendCanvas.height || 150);
+        fill.addColorStop(0, 'rgba(5, 150, 105, 0.25)');
+        fill.addColorStop(1, 'rgba(5, 150, 105, 0)');
+
         new Chart(trendCanvas, {
             type: 'line',
             data: {
@@ -301,12 +391,36 @@ document.addEventListener('DOMContentLoaded', function () {
                     label: 'Attendance',
                     data: values,
                     borderColor: emerald,
-                    backgroundColor: 'rgba(5,150,105,0.1)',
+                    backgroundColor: fill,
                     fill: true,
-                    tension: 0.4,
+                    tension: 0.45,
+                    borderWidth: 2.5,
+                    pointRadius: 0,
+                    pointHoverRadius: 5,
+                    pointHoverBackgroundColor: emerald,
+                    pointHoverBorderColor: '#ffffff',
+                    pointHoverBorderWidth: 2,
                 }]
             },
-            options: { plugins: { legend: { display: false } } }
+            options: {
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#111827',
+                        padding: 10,
+                        cornerRadius: 8,
+                        displayColors: false,
+                    },
+                },
+                scales: {
+                    x: { grid: { display: false }, border: { display: false } },
+                    y: {
+                        display: false,
+                        grid: { display: false },
+                    },
+                },
+                interaction: { intersect: false, mode: 'index' },
+            }
         });
     }
 });
