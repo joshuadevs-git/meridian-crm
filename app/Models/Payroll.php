@@ -9,6 +9,8 @@ class Payroll extends Model
     protected $fillable = [
         'employee_id',
         'payroll_date',
+        'period_start',
+        'period_end',
         'basic_salary',
         'allowance',
         'deduction',
@@ -17,6 +19,8 @@ class Payroll extends Model
 
     protected $casts = [
         'payroll_date' => 'date',
+        'period_start' => 'date',
+        'period_end' => 'date',
     ];
 
     public function employee()

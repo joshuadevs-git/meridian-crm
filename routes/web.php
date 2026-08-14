@@ -11,9 +11,9 @@ use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\EmployeeMonitorController;
 use App\Http\Controllers\EmployeeScheduleController;
 use App\Http\Controllers\ForcePasswordChangeController;
-
 
 /*
 |--------------------------------------------------------------------------
@@ -51,6 +51,16 @@ Route::middleware(['auth'])->group(function () {
 
     Route::middleware(['auth', 'force.password'])->group(function () {
 
+Route::middleware(['auth', 'force.password', 'role:Admin,HR'])
+    ->group(function () {
+
+        Route::get(
+            '/employee-monitor',
+            [EmployeeMonitorController::class, 'index']
+        )->name('employee-monitor.index');
+
+    });
+    
 
 
     /*
@@ -152,6 +162,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::middleware('role:Admin,HR')->group(function () {
 
+
         /*
         |--------------------------------------------------------------------------
         | Employees
@@ -216,6 +227,15 @@ Route::middleware(['auth'])->group(function () {
 
         Route::post('/payrolls/generate', [PayrollController::class, 'generate'])
          ->name('payrolls.generate');
+
+         Route::post('/payrolls/calculate/save', [PayrollController::class, 'saveCalculated'])
+        ->name('payrolls.calculate.save');
+
+        Route::post('/payrolls/calculate', [PayrollController::class, 'calculate'])
+        ->name('payrolls.calculate.preview');
+
+         Route::get('/payrolls/calculate', [PayrollController::class, 'calculate'])
+         ->name('payrolls.calculate');
 
         Route::resource('payrolls', PayrollController::class);
 
